@@ -1,5 +1,7 @@
 import sys, pygame
-pygame.init()
+import json
+
+OUTPUT_FILE = "maze.json"
 
 CELL_SIZE = 30
 UNVISITED_CELL_COLOR = (255,255,255)
@@ -26,6 +28,10 @@ more bits can be used for extra information if necessary after the 5th bit but t
 if visited the bit will be set 
 if there is a wall in the x direction the xth bit will be set
 '''
+NORTH_OFFSET = 3
+SOUTH_OFFSET = 2
+EAST_OFFSET = 1
+WEST_OFFSET = 0
 def calculate_origin(grid_size):
     grid_length = grid_size*CELL_SIZE
     return (
@@ -36,8 +42,8 @@ def calculate_origin(grid_size):
 def index_to_pixel(origin,i,j):
     x_0 ,y_0 = origin
     return (
-        x_0 + i*CELL_SIZE,
-        y_0 +j*CELL_SIZE
+        x_0 + j*CELL_SIZE,
+        y_0 +i*CELL_SIZE,
     )
 def draw_cell(corner_pos,chara,screen):
     '''
@@ -54,6 +60,38 @@ def draw_cell(corner_pos,chara,screen):
     #draw weak boarders for clarity
     pygame.draw.rect(screen,WEAK_BOARDER,(*index_to_pixel(corner_pos,0,0),CELL_SIZE,CELL_SIZE),BOARDER_THICKNESS) 
 
+def make_wall_helper(grid,a,b):
+    '''
+    sets the wal
+    '''
+    WALL_MAP = {
+        (-1,0):SOUTH_OFFSET,
+        (1,0):NORTH_OFFSET,
+        (0,-1):EAST_OFFSET,
+        (0,1):WEST_OFFSET
+    }
+
+    key = tuple(a[i] -b[i] for i in range(2))
+    if key in WALL_MAP:
+        grid[a[0]][a[1]] ^= 1 << WALL_MAP[key]
+
+def make_wall(grid,a,b):
+    if not(0<=a[0]<len(grid) and 0<=a[1]<len(grid[0])):
+        return 
+    if not(0<=b[0]<len(grid) and 0<=b[1]<len(grid[0])):
+        return
+
+    make_wall_helper(grid,a,b)
+    make_wall_helper(grid,b,a)
+
+
+def pixel_to_index(origin,x,y):
+    i = (x - origin[0])//CELL_SIZE
+    j = (y - origin[1])//CELL_SIZE
+    return (j,i)
+
+
+
 def draw_walls(corner_pos,chara,screen):
     northwall = bool(chara& (1<<3))
     southwall = bool(chara& (1<<2))
@@ -61,10 +99,10 @@ def draw_walls(corner_pos,chara,screen):
     westwall = bool(chara& (1<<0))
     walls = [northwall,southwall,eastwall,westwall]
     wall_positions = [
-        (index_to_pixel(corner_pos,0,0),index_to_pixel(corner_pos,1,0)),#northwall
-        (index_to_pixel(corner_pos,0,1),index_to_pixel(corner_pos,1,1)),#southwall
-        (index_to_pixel(corner_pos,1,0),index_to_pixel(corner_pos,1,1)),#eastwall
-        (index_to_pixel(corner_pos,0,0),index_to_pixel(corner_pos,0,1))#westwall
+        (index_to_pixel(corner_pos,0,0),index_to_pixel(corner_pos,0,1)),#northwall
+        (index_to_pixel(corner_pos,1,0),index_to_pixel(corner_pos,1,1)),#southwall
+        (index_to_pixel(corner_pos,0,1),index_to_pixel(corner_pos,1,1)),#eastwall
+        (index_to_pixel(corner_pos,0,0),index_to_pixel(corner_pos,1,0))#westwall
     ]
     for wall,(s,e) in zip(walls,wall_positions):
         if(wall):
@@ -84,21 +122,60 @@ def draw_grid(grid,screen):
 
 
 def get_test_grid(n,chara = 0):
-    return [[chara]*n for _ in range(n)]
+    grid =  [[chara]*n for _ in range(n)]
+    for j in range(len(grid[0])):
+        grid[0][j] |= 1 << NORTH_OFFSET 
+        print(bin(grid[0][j]),end=",")
+        grid[-1][j] |= 1 << SOUTH_OFFSET
+    for k in range(len(grid)):
+        grid[k][0] |= 1 << WEST_OFFSET 
+        grid[k][-1] |= 1 << EAST_OFFSET 
+        pass
+    return grid
+
+def transform_grid(grid,tf):
+    return [[tf(i) for i in row] for row in grid]
+def output_grid(grid):
+    with open(OUTPUT_FILE,"w+") as f:
+
+        f.write(json.dumps(transform_grid(grid,bin)))
 
 def main():
-    screen = pygame.display.set_mode(SCREEN_SIZE)
 
-    while True:
+    pygame.init()
+    screen = pygame.display.set_mode(SCREEN_SIZE)
+    grid = get_test_grid(2,0b00000)
+    last_clicked_location = None
+    adjacent_cells = []
+    origin = calculate_origin(len(grid))
+    Running = True
+    while Running:
         for event in pygame.event.get():
-            if event.type == pygame.QUIT: sys.exit()
+            if event.type == pygame.QUIT:
+                Running =False
+                break
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                last_clicked_location = event.pos
+            if event.type == pygame.MOUSEBUTTONUP:
+                if(last_clicked_location is not None):
+                    adjacent_cells.append(last_clicked_location)
+                    last_clicked_location = None
+        if len(adjacent_cells) >=2:
+            print(adjacent_cells)
+            a,b = adjacent_cells[:2]
+            adjacent_cells.clear()
+            a,b = pixel_to_index(origin,*a),pixel_to_index(origin,*b)
+            make_wall(grid,a,b)  
+
+
         
         
         screen.fill(BACKGROUND_COLOR)
-        test_grid = get_test_grid(16,0b01000)
-        draw_grid(test_grid,screen) 
+        draw_grid(grid,screen) 
         pygame.display.flip()
 
+        output_grid(grid)
 
 
 
