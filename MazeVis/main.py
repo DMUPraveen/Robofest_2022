@@ -175,7 +175,7 @@ def main():
         draw_grid(grid,screen) 
         pygame.display.flip()
 
-        output_grid(grid)
+    output_grid(grid)
 
 
 
