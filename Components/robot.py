@@ -55,7 +55,6 @@ class QueryEnv:
         raise Exception("Robot has requested an illegal move")
 
     def update(self,move):
-        di,dj = DIRECTION_MAP[self.orientation]
         if(move == FORWARD):
             self._update_delta(self.orientation)
         if(move == BACKWARD):
@@ -85,7 +84,7 @@ class Robot:
     def __init__(self,query_environment:QueryEnv):
         self.j = 0 
         self.i = self.query_environment.get_dimensions() -1
-        self.orientation =0
+        self.orientation =EAST
         self.query_environment = query_environment
         self.second_major_direction = None 
         self.grid = self.make_internal_map()
@@ -95,5 +94,40 @@ class Robot:
         grid = [[0]*dim for _ in range(dim*2-1)]
         return Grid(grid)
 
+    def _move_internal(self,move):
+        if(move == FORWARD):
+            di,dj = DIRECTION_MAP[self.orientation]
+            self.i += di
+            self.j += dj
+        if(move == BACKWARD):
+            di,dj = DIRECTION_MAP[OPPOSITE_MAP[self.orientation]]
+            self.i += di
+            self.j += dj
+        if(move == TURN_BACK):
+            self.orientation = OPPOSITE_MAP[self.orientation]
+        if(move == TURN_LEFT):
+            self.orientation = LEFT_MAP[self.orientation] 
+        if(move == TURN_RIGHT):
+            self.orientation = RIGHT_MAP[self.orientation]
+
+            
+
     def orient(self):
+        while(not any((self.query_environment.query()))):
+            self.query_environment.update(TURN_RIGHT)
         left,front,right = self.query_environment.query()
+        if(front):
+            pass
+        elif(left):
+            self.query_environment.update(TURN_LEFT)
+        elif(right):
+            self.query_environment.update(TURN_RIGHT)
+        
+        left,front,right = self.query_environment.query()
+        if(left):
+            self.second_major_direction = LEFT_MAP[self.orientation]
+        if(right):
+            self.second_major_direction = RIGHT_MAP[self.orientation]
+        
+        
+        
