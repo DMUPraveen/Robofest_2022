@@ -1,7 +1,9 @@
+from ast import arg, arguments
+from msilib.schema import IniFile
 import sys, pygame
 import json
 
-OUTPUT_FILE = "maze.json"
+DEFAULT_OUTPUT_FILE = "maze.json"
 
 CELL_SIZE = 30
 UNVISITED_CELL_COLOR = (255,255,255)
@@ -132,20 +134,38 @@ def get_test_grid(n,chara = 0):
         grid[k][-1] |= 1 << EAST_OFFSET 
         pass
     return grid
+def get_grid(infile):
+    if(infile is None):
+        n = int(input("What should the dimension of the grid be?: "))
+        return get_test_grid(n)
+    
+    with open(infile) as f:
+        return json.loads(f.read())
+
 
 def transform_grid(grid,tf):
     return [[tf(i) for i in row] for row in grid]
-def output_grid(grid):
-    with open(OUTPUT_FILE,"w+") as f:
+def output_grid(grid,outputfile=DEFAULT_OUTPUT_FILE):
+    with open(DEFAULT_OUTPUT_FILE,"w+") as f:
 
-        f.write(json.dumps(transform_grid(grid,bin)))
+        f.write(json.dumps(transform_grid(grid,lambda x:x)))
 
+def parse_arguments(argv):
+    outfile = DEFAULT_OUTPUT_FILE
+    infile = None
+    if(len(argv)>1):
+        outfile = argv[1]
+    if(len(argv) >2):
+        infile = argv[2]
+    return outfile,infile
 def main():
-
+    
+    outfile, infile = parse_arguments(sys.argv)
+    grid =  get_grid(infile) 
     pygame.init()
     screen = pygame.display.set_mode(SCREEN_SIZE)
-    grid = get_test_grid(2,0b00000)
     last_clicked_location = None
+
     adjacent_cells = []
     origin = calculate_origin(len(grid))
     Running = True
@@ -175,7 +195,7 @@ def main():
         draw_grid(grid,screen) 
         pygame.display.flip()
 
-    output_grid(grid)
+    output_grid(grid,outfile)
 
 
 
