@@ -70,3 +70,5 @@ class Grid:
 
         self.make_wall_helper(a,b)
         self.make_wall_helper(b,a)
+    def set_visited(self,i,j):
+        self.grid[i][j] |= 1 <<VISITED

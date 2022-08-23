@@ -1,8 +1,8 @@
 from Components.grid import Grid,NORTH,SOUTH,EAST,WEST
+from typing import Dict,Tuple
 
 
-
-DIRECTION_MAP = {
+DIRECTION_MAP:Dict[int,Tuple[int,int]] = {
     NORTH : (-1,0),
     SOUTH : (1,0),
     EAST : (0,1),
@@ -88,6 +88,7 @@ class Robot:
         self.query_environment = query_environment
         self.second_major_direction = None 
         self.grid = self.make_internal_map()
+        self.centers = None
 
     def make_internal_map(self):
         dim = self.query_environment.get_dimensions()
@@ -110,8 +111,21 @@ class Robot:
         if(move == TURN_RIGHT):
             self.orientation = RIGHT_MAP[self.orientation]
 
-            
-
+    def set_center(self):
+        assert(self.second_major_direction is not None)
+        dj = 1
+        di = DIRECTION_MAP[self.second_major_direction][0] 
+        assert(di !=0)
+        center = (
+            self.i+di*(self.query_environment.get_dimensions()//2-1),
+            self.j+dj*(self.query_environment.get_dimensions()//2-1),
+        )
+        self.centers = (
+            center,
+            (center[0],center[1]+dj),
+            (center[0]+di,center[1]),
+            (center[0]+di,center[1]+dj)
+        )
     def orient(self):
         while(not any((self.query_environment.query()))):
             self.query_environment.update(TURN_RIGHT)
@@ -128,6 +142,12 @@ class Robot:
             self.second_major_direction = LEFT_MAP[self.orientation]
         if(right):
             self.second_major_direction = RIGHT_MAP[self.orientation]
-        
+        if(self.second_major_direction is not None):
+            self.set_center()
+    def find_center(self):
+
+        if self.centers is not None and (self.i,self.j) in self.centers:
+            return True 
+          
         
         
