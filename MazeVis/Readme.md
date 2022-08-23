@@ -1,4 +1,4 @@
-#Maze Visualizer
+# Maze Visualizer
 
 This program can be used for editing and visualizing mazes and for outputing them elsewhere. 
 The mazes are represented in a custom format described as follow
