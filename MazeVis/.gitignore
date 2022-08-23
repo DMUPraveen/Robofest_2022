@@ -1,0 +1,2 @@
+# ignoring maze files outputed by the program
+*.json
