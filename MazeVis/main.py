@@ -1,7 +1,13 @@
-from ast import arg, arguments
-from msilib.schema import IniFile
+
 import sys, pygame
+import os
 import json
+
+path = os.path.join(os.path.dirname(sys.path[0]))
+sys.path.append(path)
+print(sys.path)
+from Graphic_Engine.Graphic_Engine import Graphic_Engine,calculate_origin,pixel_to_index,index_to_pixel
+from Components.grid import Grid
 
 DEFAULT_OUTPUT_FILE = "maze.json"
 
@@ -34,94 +40,6 @@ NORTH_OFFSET = 3
 SOUTH_OFFSET = 2
 EAST_OFFSET = 1
 WEST_OFFSET = 0
-def calculate_origin(grid_size):
-    grid_length = grid_size*CELL_SIZE
-    return (
-        (SCREEN_WIDTH - grid_length)//2,
-        (SCREEN_HEIGHT -  grid_length)//2
-    )
-
-def index_to_pixel(origin,i,j):
-    x_0 ,y_0 = origin
-    return (
-        x_0 + j*CELL_SIZE,
-        y_0 +i*CELL_SIZE,
-    )
-def draw_cell(corner_pos,chara,screen):
-    '''
-    draws a squre cell of at position i,j with the characatereistc chara
-    '''
-    visited = bool(chara& (1<<4))
-
-    
-    cell_color = VISITED_CELL_COLOR if visited else UNVISITED_CELL_COLOR
-   
-    #draw the filled cell
-    pygame.draw.rect(screen,cell_color,(*index_to_pixel(corner_pos,0,0),CELL_SIZE,CELL_SIZE)) 
-
-    #draw weak boarders for clarity
-    pygame.draw.rect(screen,WEAK_BOARDER,(*index_to_pixel(corner_pos,0,0),CELL_SIZE,CELL_SIZE),BOARDER_THICKNESS) 
-
-def make_wall_helper(grid,a,b):
-    '''
-    sets the wal
-    '''
-    WALL_MAP = {
-        (-1,0):SOUTH_OFFSET,
-        (1,0):NORTH_OFFSET,
-        (0,-1):EAST_OFFSET,
-        (0,1):WEST_OFFSET
-    }
-
-    key = tuple(a[i] -b[i] for i in range(2))
-    if key in WALL_MAP:
-        grid[a[0]][a[1]] ^= 1 << WALL_MAP[key]
-
-def make_wall(grid,a,b):
-    if not(0<=a[0]<len(grid) and 0<=a[1]<len(grid[0])):
-        return 
-    if not(0<=b[0]<len(grid) and 0<=b[1]<len(grid[0])):
-        return
-
-    make_wall_helper(grid,a,b)
-    make_wall_helper(grid,b,a)
-
-
-def pixel_to_index(origin,x,y):
-    i = (x - origin[0])//CELL_SIZE
-    j = (y - origin[1])//CELL_SIZE
-    return (j,i)
-
-
-
-def draw_walls(corner_pos,chara,screen):
-    northwall = bool(chara& (1<<3))
-    southwall = bool(chara& (1<<2))
-    eastwall = bool(chara& (1<<1))
-    westwall = bool(chara& (1<<0))
-    walls = [northwall,southwall,eastwall,westwall]
-    wall_positions = [
-        (index_to_pixel(corner_pos,0,0),index_to_pixel(corner_pos,0,1)),#northwall
-        (index_to_pixel(corner_pos,1,0),index_to_pixel(corner_pos,1,1)),#southwall
-        (index_to_pixel(corner_pos,0,1),index_to_pixel(corner_pos,1,1)),#eastwall
-        (index_to_pixel(corner_pos,0,0),index_to_pixel(corner_pos,1,0))#westwall
-    ]
-    for wall,(s,e) in zip(walls,wall_positions):
-        if(wall):
-            pygame.draw.line(screen,THICK_BOARDER,s,e,WALL_THICKNESS)
-
-
-
-def draw_grid(grid,screen):
-    origin = calculate_origin(len(grid))
-    itop = lambda x,y : index_to_pixel(origin,x,y)
-    for i,row in enumerate(grid):
-        for j,chara in enumerate(row):
-            draw_cell(itop(i,j),chara,screen)
-    for i,row in enumerate(grid):
-        for j,chara in enumerate(row):
-            draw_walls(itop(i,j),chara,screen)
-
 
 def get_test_grid(n,chara = 0):
     grid =  [[chara]*n for _ in range(n)]
@@ -158,17 +76,19 @@ def parse_arguments(argv):
     if(len(argv) >2):
         infile = argv[2]
     return outfile,infile
+
 def main():
     
     outfile, infile = parse_arguments(sys.argv)
-    grid =  get_grid(infile) 
+    grid =  Grid(get_grid(infile))
     pygame.init()
     screen = pygame.display.set_mode(SCREEN_SIZE)
     last_clicked_location = None
 
     adjacent_cells = []
-    origin = calculate_origin(len(grid))
+    origin = calculate_origin(screen,grid.get_height())
     Running = True
+    gfx = Graphic_Engine(screen,origin)
     while Running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -186,16 +106,15 @@ def main():
             a,b = adjacent_cells[:2]
             adjacent_cells.clear()
             a,b = pixel_to_index(origin,*a),pixel_to_index(origin,*b)
-            make_wall(grid,a,b)  
-
+            grid.make_wall(a,b)
 
         
         
         screen.fill(BACKGROUND_COLOR)
-        draw_grid(grid,screen) 
+        gfx.draw_grid(grid)
         pygame.display.flip()
 
-    output_grid(grid,outfile)
+    output_grid(grid.grid,outfile)
 
 
 
