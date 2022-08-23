@@ -12,7 +12,6 @@ more bits can be used for extra information if necessary after the 5th bit but t
 |  1  |  2  |  3  |  4  |  5  |
 |-----|-----|-----|-----|-----|
 |visit|north|south|east |west |
-|-----|-----|-----|-----|-----|
 
 if visited the bit will be set 
 if there is a wall in the x direction the xth bit will be set
