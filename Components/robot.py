@@ -158,9 +158,12 @@ class Robot:
 
     def make_internal_map(self):
         dim = self.query_environment.get_dimensions()
-        grid = [[0]*dim for _ in range(dim*2-1)]
+        grid = [[0]*(dim+2) for _ in range(dim*2)]
         return Grid(grid)
 
+    def make_wall(self,a,b):
+        if(not self.grid.make_wall(a,b)):
+            panic("make wall in out of bound places")
     def _move_internal(self,move):
         if(move == FORWARD):
             di,dj = DIRECTION_MAP[self.orientation]
@@ -211,6 +214,7 @@ class Robot:
         if(self.second_major_direction is not None):
             self.set_center()
     def search(self):
+
 
         if self.centers is not None and (self.i,self.j) in self.centers:
             return True 

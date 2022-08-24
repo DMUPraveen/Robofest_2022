@@ -61,14 +61,22 @@ class Grid:
         key = tuple(a[i] -b[i] for i in range(2))
         if key in WALL_MAP:
             self.grid[a[0]][a[1]] ^= 1 << WALL_MAP[key]
+            return True
+        return False
 
     def make_wall(self,a,b):
         if not(0<=a[0]<len(self.grid) and 0<=a[1]<len(self.grid[0])):
-            return 
+            return False 
         if not(0<=b[0]<len(self.grid) and 0<=b[1]<len(self.grid[0])):
-            return
+            return False
 
-        self.make_wall_helper(a,b)
-        self.make_wall_helper(b,a)
+        stat1 = self.make_wall_helper(a,b)
+        stat2 = self.make_wall_helper(b,a)
+        return (stat1 and stat2)
     def set_visited(self,i,j):
         self.grid[i][j] |= 1 <<VISITED
+    def set_additional_data(self,i,j,data):
+        self.grid[i][j] &=   ((1 <<(VISITED+1))-1)
+        self.grid[i][j] |=  data << (VISITED+1) 
+    def get_additional_data(self,i,j):
+        return self.grid[i][j] >> (VISITED+1)
