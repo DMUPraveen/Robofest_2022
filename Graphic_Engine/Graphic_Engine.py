@@ -7,14 +7,17 @@ WEAK_BOARDER = (122,122,122)
 THICK_BOARDER = (0,0,0) 
 BOARDER_THICKNESS = 2
 WALL_THICKNESS = 4
-def calculate_origin(screen,grid_size):
+def calculate_origin(screen,grid_width,grid_height=None):
+    if(grid_height is None):
+        grid_height =grid_width 
     '''
     usefull or calculating a origin in pixel space such that the grid is centerd in the screen
     '''
-    grid_length = grid_size*CELL_SIZE
+    grid_width = grid_width*CELL_SIZE
+    grid_height = grid_height*CELL_SIZE
     return (
-        (screen.get_width() - grid_length)//2,
-        (screen.get_height() -  grid_length)//2
+        (screen.get_width() - grid_width)//2,
+        (screen.get_height() -  grid_height)//2
     )
 
 def index_to_pixel(origin,i,j):

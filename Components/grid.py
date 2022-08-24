@@ -72,7 +72,7 @@ class Grid:
 
         stat1 = self.make_wall_helper(a,b)
         stat2 = self.make_wall_helper(b,a)
-        return (stat1 and stat2)
+        return (stat1 and stat2) 
     def set_visited(self,i,j):
         self.grid[i][j] |= 1 <<VISITED
     def set_additional_data(self,i,j,data):

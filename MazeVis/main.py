@@ -5,7 +5,7 @@ import json
 
 path = os.path.join(os.path.dirname(sys.path[0]))
 sys.path.append(path)
-print(sys.path)
+# p=irint(sys.path)
 from Graphic_Engine.Graphic_Engine import Graphic_Engine,calculate_origin,pixel_to_index,index_to_pixel
 from Components.grid import Grid
 
@@ -45,7 +45,7 @@ def get_test_grid(n,chara = 0):
     grid =  [[chara]*n for _ in range(n)]
     for j in range(len(grid[0])):
         grid[0][j] |= 1 << NORTH_OFFSET 
-        print(bin(grid[0][j]),end=",")
+        # print(bin(grid[0][j]),end=",")
         grid[-1][j] |= 1 << SOUTH_OFFSET
     for k in range(len(grid)):
         grid[k][0] |= 1 << WEST_OFFSET 
@@ -76,11 +76,7 @@ def parse_arguments(argv):
     if(len(argv) >2):
         infile = argv[2]
     return outfile,infile
-
-def main():
-    
-    outfile, infile = parse_arguments(sys.argv)
-    grid =  Grid(get_grid(infile))
+def visually_edit_grid(grid:Grid):
     pygame.init()
     screen = pygame.display.set_mode(SCREEN_SIZE)
     last_clicked_location = None
@@ -102,7 +98,7 @@ def main():
                     adjacent_cells.append(last_clicked_location)
                     last_clicked_location = None
         if len(adjacent_cells) >=2:
-            print(adjacent_cells)
+            # print(adjacent_cells)
             a,b = adjacent_cells[:2]
             adjacent_cells.clear()
             a,b = pixel_to_index(origin,*a),pixel_to_index(origin,*b)
@@ -113,7 +109,14 @@ def main():
         screen.fill(BACKGROUND_COLOR)
         gfx.draw_grid(grid)
         pygame.display.flip()
+    pygame.quit()
 
+
+def main():
+    
+    outfile, infile = parse_arguments(sys.argv)
+    grid =  Grid(get_grid(infile))
+    visually_edit_grid(grid)
     output_grid(grid.grid,outfile)
 
 

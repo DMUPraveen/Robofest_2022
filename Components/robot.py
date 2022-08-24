@@ -27,13 +27,23 @@ RIGHT_MAP = {
       EAST:SOUTH,
       NORTH:EAST,
 }
+
+WALL_MAP = {
+    SOUTH:(1,0),
+    NORTH:(-1,0),
+    EAST:(0,1),
+    WEST:(0,-1),
+}
 FORWARD = 0
 BACKWARD= 1
 TURN_RIGHT = 2
 TURN_LEFT = 3
 TURN_BACK = 4
 
-
+FRONT = 0
+LEFT = 1
+RIGHT = 2
+BACK = 3
 class PanicException(Exception):
     pass
 
@@ -148,20 +158,36 @@ class QueryEnv:
         return self.env.get_height()
 class Robot:
     def __init__(self,query_environment:QueryEnv):
-        self.j = 0 
+        self.query_environment = query_environment
+        self.j = 1 
         self.i = self.query_environment.get_dimensions() -1
         self.orientation =EAST
-        self.query_environment = query_environment
         self.second_major_direction = None 
         self.grid = self.make_internal_map()
         self.centers = None
+        
 
     def make_internal_map(self):
         dim = self.query_environment.get_dimensions()
         grid = [[0]*(dim+2) for _ in range(dim*2)]
         return Grid(grid)
 
-    def make_wall(self,a,b):
+    def relative_ro_absolute(self,rel_dir):
+        if(rel_dir == FRONT):
+            return self.orientation
+        if(rel_dir == BACK):
+            return OPPOSITE_MAP[self.orientation]
+        if(rel_dir == LEFT):
+            return LEFT_MAP[self.orientation]
+        if(rel_dir == RIGHT):
+            return RIGHT_MAP[self.orientation]
+        assert(False)
+    def make_wall_rel_direction(self,rel_direction): 
+        orientation = self.relative_ro_absolute(rel_direction)
+        
+        a = (self.i,self.j)
+        di,dj = WALL_MAP[orientation]
+        b = (self.i+di,self.j+dj)
         if(not self.grid.make_wall(a,b)):
             panic("make wall in out of bound places")
     def _move_internal(self,move):
@@ -196,23 +222,29 @@ class Robot:
             (center[0]+di,center[1]+dj)
         )
     def orient(self):
-        while(not any((self.query_environment.query()))):
+        while(not any((not i for i in self.query_environment.query()))):
             self.query_environment.update(TURN_RIGHT)
         left,front,right = self.query_environment.query()
-        if(front):
+        if(not front):
             pass
-        elif(left):
+        elif(not left):
             self.query_environment.update(TURN_LEFT)
-        elif(right):
+        elif(not right):
             self.query_environment.update(TURN_RIGHT)
-        
+        self.make_wall_rel_direction(BACK)
+         
         left,front,right = self.query_environment.query()
-        if(left):
+        if(not left):
             self.second_major_direction = LEFT_MAP[self.orientation]
-        if(right):
+        else:
+            self.make_wall_rel_direction(LEFT)
+        if(not right):
             self.second_major_direction = RIGHT_MAP[self.orientation]
+        else:
+            self.make_wall_rel_direction(RIGHT)
         if(self.second_major_direction is not None):
             self.set_center()
+        
     def search(self):
 
 
