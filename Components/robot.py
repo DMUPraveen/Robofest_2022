@@ -32,6 +32,72 @@ BACKWARD= 1
 TURN_RIGHT = 2
 TURN_LEFT = 3
 TURN_BACK = 4
+
+
+class PanicException(Exception):
+    pass
+
+def panic(s):
+    raise PanicException(s)
+
+class Queue:
+    def __init__(self,max_size):
+        self.max_size = max_size
+        self.array = [0]*(max_size+1)
+        self.begin = 0
+        self.end = 0
+    def size(self):
+        return (self.end - self.begin + len(self.array))%len(self.array)
+    def empty(self):
+        return self.size() == 0
+    def full(self):
+        return self.size() == self.max_size
+    def push(self,x):
+        if(self.full()):
+            panic("Queue is full but trying to push")
+        self.array[self.end] = x 
+        self.end = (self.end+1)%len(self.array)
+    def pop(self):
+        if(self.empty()):
+            panic("The Queue is empty but trying to pop")
+        ret = self.array[self.begin]
+        self.begin = (self.begin+1)%len(self.array)
+        return ret
+    def peek(self):
+        if(self.empty()):
+            panic("The Queue is empty but trying to peek")
+        return self.array[self.begin]
+    def clear(self):
+        self.begin = 0
+        self.end = 0
+class Stack:
+    def __init__(self,max_size):
+        self.array = [0]*max_size
+        self.end = 0 #points to the next element from the last element 
+    def size(self):
+        return self.end
+    def empty(self):
+        return self.size() == 0
+    def full(self):
+        return self.size() == len(self.array)
+    def push(self,x):
+        if(self.full()):
+            panic("Pushing to an already full stack")
+        self.array[self.end] = x
+        self.end += 1
+    def pop(self):
+        if(self.empty()):
+            panic("Popping from an already empty stack")
+        self.end -=1
+        return self.array[self.end]
+    def peek(self):
+        if(self.empty()):
+            panic("Peeking from an already empty stack")
+        return self.array[self.end-1]
+    def clear(self):
+        self.end = 0
+
+
 class QueryEnv:
     def __init__(self,grid:Grid,position,orientation):
         '''
@@ -144,7 +210,7 @@ class Robot:
             self.second_major_direction = RIGHT_MAP[self.orientation]
         if(self.second_major_direction is not None):
             self.set_center()
-    def find_center(self):
+    def search(self):
 
         if self.centers is not None and (self.i,self.j) in self.centers:
             return True 
