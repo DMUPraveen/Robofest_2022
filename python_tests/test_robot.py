@@ -13,20 +13,40 @@ from MazeVis.main import get_test_grid,visually_edit_grid
                              
                              
 def test_robot_orientation():
-    grid = Grid(get_test_grid(5))
+    grid = Grid(get_test_grid(6))
     visually_edit_grid(grid) 
-    qeu = QueryEnv(grid,(0,0),WEST)
+    qeu = QueryEnv(grid,(0,0),EAST)
+
     robot = Robot(qeu)
     robot.orient()
+    if(robot.centers is not None):
+        for i,j in robot.centers:
+            robot.grid.set_visited(i,j)
     visually_edit_grid(robot.grid)
+
+def test_dfs():
+
+    grid = Grid(get_test_grid(6))
+    visually_edit_grid(grid) 
+    qeu = QueryEnv(grid,(0,0),WEST)
+
+    robot = Robot(qeu)
+    robot.orient()
+    while(not robot.search()):
+        # if(robot.centers is not None):
+        #     for center in robot.centers:
+        #         robot.grid.set_visited(*center)
+        
+        print(robot.position(),(qeu.i,qeu.j))
+
+        visually_edit_grid(robot.grid)
 
 
 
 
 
 def main():
-
-    test_robot_orientation()
+    test_dfs()
     
 
 

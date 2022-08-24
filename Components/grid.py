@@ -73,6 +73,33 @@ class Grid:
         stat1 = self.make_wall_helper(a,b)
         stat2 = self.make_wall_helper(b,a)
         return (stat1 and stat2) 
+
+    def set_wall_helper(self,a,b):
+        '''
+        sets the wal
+        '''
+        WALL_MAP = {
+            (-1,0):SOUTH,
+            (1,0):NORTH,
+            (0,-1):EAST,
+            (0,1):WEST,
+        }
+
+        key = tuple(a[i] -b[i] for i in range(2))
+        if key in WALL_MAP:
+            self.grid[a[0]][a[1]] |= 1 << WALL_MAP[key]
+            return True
+        return False
+
+    def set_wall(self,a,b):
+        if not(0<=a[0]<len(self.grid) and 0<=a[1]<len(self.grid[0])):
+            return False 
+        if not(0<=b[0]<len(self.grid) and 0<=b[1]<len(self.grid[0])):
+            return False
+
+        stat1 = self.set_wall_helper(a,b)
+        stat2 = self.set_wall_helper(b,a)
+        return (stat1 and stat2) 
     def set_visited(self,i,j):
         self.grid[i][j] |= 1 <<VISITED
     def set_additional_data(self,i,j,data):
