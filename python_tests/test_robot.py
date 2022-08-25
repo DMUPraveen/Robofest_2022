@@ -6,7 +6,7 @@ sys.path.append(path)
 from Components.robot import Robot,QueryEnv
 from Components.grid import Grid,NORTH,SOUTH,EAST,WEST
 from Graphic_Engine.Graphic_Engine import Graphic_Engine,calculate_origin
-from MazeVis.main import get_test_grid,visually_edit_grid,calculate_origin
+from MazeVis.main import get_test_grid,visually_edit_grid
 import pygame                             
 
 
@@ -36,6 +36,7 @@ def visually_test_robot(robot:Robot):
         
         screen.fill(BACKGROUND_COLOR)
         gfx.draw_grid(robot.grid)
+        gfx.draw_robot(robot)
         pygame.display.flip()
     pygame.quit()
     

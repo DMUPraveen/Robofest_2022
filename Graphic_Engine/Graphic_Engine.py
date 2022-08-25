@@ -1,4 +1,5 @@
 import pygame
+from typing import Dict,Tuple
 CELL_SIZE = 30
 UNVISITED_CELL_COLOR = (255,255,255)
 VISITED_CELL_COLOR = (0,0,255)
@@ -7,6 +8,21 @@ WEAK_BOARDER = (122,122,122)
 THICK_BOARDER = (0,0,0) 
 BOARDER_THICKNESS = 2
 WALL_THICKNESS = 4
+
+
+ROBOT_COLOR = (255,0,0)
+
+NORTH  = 3
+SOUTH = 2
+EAST = 1
+WEST = 0
+
+PIXEL_SPACE_DIRECTION_MAP:Dict[int,Tuple[int,int]] = {
+    SOUTH:(0,1),
+    NORTH:(0,-1),
+    EAST:(1,0),
+    WEST:(-1,0),
+}
 def calculate_origin(screen,grid_width,grid_height=None):
     if(grid_height is None):
         grid_height =grid_width 
@@ -74,3 +90,11 @@ class Graphic_Engine:
         for wall,(s,e) in zip(walls,wall_positions):
             if(wall):
                 pygame.draw.line(self.screen,THICK_BOARDER,s,e,WALL_THICKNESS)
+    
+    def draw_robot(self,robot):
+        position = index_to_pixel(self.origin,robot.i,robot.j)
+        position = tuple(i + CELL_SIZE//2 for i in position) #setting the position to the center of the cell rather than the corner
+        pygame.draw.circle(self.screen,ROBOT_COLOR,position,CELL_SIZE//2)
+        next_pos = tuple(position[i]+PIXEL_SPACE_DIRECTION_MAP[robot.orientation][i]*CELL_SIZE//2 for i in range(2))        
+        # print(next_pos)
+        pygame.draw.line(self.screen,BACKGROUND_COLOR,position,next_pos)
