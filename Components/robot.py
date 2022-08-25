@@ -176,7 +176,14 @@ class Robot:
     def make_internal_map(self):
         dim = self.query_environment.get_dimensions()
         grid = [[0]*(dim+2) for _ in range(dim*2+1)]
-        return Grid(grid)
+        g = Grid(grid)
+        for j in range(1,g.get_wdith()-1):
+            g.set_wall((0,j),(1,j))
+            g.set_wall((g.get_height()-1,j),(g.get_height()-2,j))
+        for i in range(1,g.get_height()-1):
+            g.set_wall((i,0),(i,1))
+            g.set_wall((i,g.get_wdith()-1),(i,g.get_wdith()-2))
+        return g
 
     def relative_ro_absolute(self,rel_dir):
         if(rel_dir == FRONT):
@@ -236,6 +243,12 @@ class Robot:
             (center[0]+di,center[1]),
             (center[0]+di,center[1]+dj)
         )
+        #also draw the boundaries while we are at it
+        wall_dir = OPPOSITE_MAP[self.second_major_direction]
+        for j in range(1,self.grid.get_wdith()-1):
+            next_i = start_i+DIRECTION_MAP[wall_dir][0]
+            self.grid.set_wall((start_i,j),(next_i,j))
+
 
     def orient(self):
         while(not any((not i for i in self.query_environment.query()))):
