@@ -5,7 +5,7 @@ sys.path.append(path)
 
 from Components.robot import Robot,QueryEnv
 from Components.grid import Grid,NORTH,SOUTH,EAST,WEST
-from Graphic_Engine.Graphic_Engine import Graphic_Engine
+from Graphic_Engine.Graphic_Engine import Graphic_Engine,calculate_origin
 from MazeVis.main import get_test_grid,visually_edit_grid,calculate_origin
 import pygame                             
 
