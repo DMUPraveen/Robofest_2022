@@ -379,11 +379,11 @@ class Robot:
         best = BACK
         best_distance = float('inf') 
         options = 0
-        for dire,wall in zip((LEFT,FRONT,RIGHT),(left,front,right)):
-            if(not wall and not self.grid.visited(*self.get_cell(dire))):
-                best = dire
-                options += 1
-        if(options <=1):
+        if(self.centers is None):
+            for dire,wall in zip((LEFT,FRONT,RIGHT),(left,front,right)):
+                if(not wall and not self.grid.visited(*self.get_cell(dire))):
+                    best = dire
+                    options += 1
             return best
 
             
