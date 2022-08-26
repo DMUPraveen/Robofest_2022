@@ -64,7 +64,7 @@ def get_grid(infile):
 def transform_grid(grid,tf):
     return [[tf(i) for i in row] for row in grid]
 def output_grid(grid,outputfile=DEFAULT_OUTPUT_FILE):
-    with open(DEFAULT_OUTPUT_FILE,"w+") as f:
+    with open(outputfile,"w+") as f:
 
         f.write(json.dumps(transform_grid(grid,lambda x:x)))
 

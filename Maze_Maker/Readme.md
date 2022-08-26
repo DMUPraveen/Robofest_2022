@@ -1,3 +1,2 @@
 # Generates random mazes for testing algorithms
 
-Not implemented yet ...
