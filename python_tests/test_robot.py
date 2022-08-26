@@ -8,8 +8,8 @@ from Components.grid import Grid,NORTH,SOUTH,EAST,WEST
 from Graphic_Engine.Graphic_Engine import Graphic_Engine,calculate_origin
 from MazeVis.main import get_test_grid,visually_edit_grid
 import pygame                             
-
-
+import logging
+logging.basicConfig(level="INFO")
 
 
 
@@ -31,7 +31,7 @@ def visually_test_robot(robot:Robot):
             if event.type == pygame.KEYDOWN:
                 if(event.unicode == SIMULATE_NEXT_KEY):
                     robot.search()
-
+                    logging.info(f"robot bfs count is {robot.bfs_count}")
         
         
         screen.fill(BACKGROUND_COLOR)
