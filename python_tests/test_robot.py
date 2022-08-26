@@ -6,7 +6,7 @@ sys.path.append(path)
 from Components.robot import Robot,QueryEnv
 from Components.grid import Grid,NORTH,SOUTH,EAST,WEST
 from Graphic_Engine.Graphic_Engine import Graphic_Engine,calculate_origin
-from MazeVis.main import get_test_grid,visually_edit_grid
+from MazeVis.main import get_test_grid,visually_edit_grid,get_grid
 import pygame                             
 import logging
 logging.basicConfig(level="INFO")
@@ -30,7 +30,8 @@ def visually_test_robot(robot:Robot):
                 break
             if event.type == pygame.KEYDOWN:
                 if(event.unicode == SIMULATE_NEXT_KEY):
-                    robot.search()
+                    if(robot.search()):
+                        logging.info(f"robot search is finished")
                     logging.info(f"robot bfs count is {robot.bfs_count}")
         
         
@@ -56,11 +57,9 @@ def test_robot_orientation():
             robot.grid.set_visited(i,j)
     visually_edit_grid(robot.grid)
 
-def test_dfs():
+def test_dfs(grid:Grid):
 
-    grid = Grid(get_test_grid(6))
-    visually_edit_grid(grid) 
-    qeu = QueryEnv(grid,(0,0),WEST)
+    qeu = QueryEnv(grid,(0,0),EAST)
 
     robot = Robot(qeu)
     robot.orient()
@@ -69,7 +68,15 @@ def test_dfs():
 
 
 def main():
-    test_dfs()
+
+    grid = get_test_grid(6)
+    if(len(sys.argv) >1):
+        inputfile = sys.argv[1]
+        grid = get_grid(inputfile) 
+    
+    grid =Grid(grid)
+    visually_edit_grid(grid) 
+    test_dfs(grid)
     
 
 

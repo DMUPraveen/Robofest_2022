@@ -73,7 +73,7 @@ def main():
     number_of_cycles = int(input("Number of cycles: "))
 
     maze = mazmake(dimensions_of_the_grid,number_of_cycles)
-    if(len(sys.argv) >=1):
+    if(len(sys.argv) >1):
         file_name = sys.argv[1]
         output_grid(maze.grid,file_name)
 
