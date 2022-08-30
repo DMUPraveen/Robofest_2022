@@ -1,3 +1,5 @@
+#ifndef STRUCTURES_HEADER
+#define STRUCTURES_HEADER
 #include <stdint.h>
 #include "Panic.h"
 
@@ -133,3 +135,5 @@ struct Relative_Grid_Pos{
     int32_t di;
     int32_t dj;
 };
+
+#endif

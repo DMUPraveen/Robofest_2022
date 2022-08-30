@@ -1,3 +1,5 @@
+#ifndef UTILITY_HEADER
+#define UTILITY_HEADER
 #include "Structures.h"
 
 
@@ -42,3 +44,4 @@ ABS_DIRECTION get_rel_direction(ABS_DIRECTION dir, REL_DIRECTION reldir){
         break;
     }
 }
+#endif

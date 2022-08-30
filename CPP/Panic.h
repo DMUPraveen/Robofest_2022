@@ -1,3 +1,5 @@
+#ifndef PANIC_GAURD
+#define PANIC_GAURD
 enum class PANICCODE{
     PANIC,
     STACK_FULL,
@@ -10,3 +12,4 @@ enum class PANICCODE{
 void panic(PANICCODE panic){
     throw (panic);
 }
+#endif
