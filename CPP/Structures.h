@@ -73,4 +73,63 @@ public:
     bool empty(){
         return size() == 0;
     }
+
+    bool full(){
+        return size() == MAX_SIZE;
+    }
+
+    void push(T x){
+        if(full()){
+            panic(PANICCODE::QUEUE_FULL);
+        }
+        array[end] = x;
+        end = (end+1) % MOD;
+
+    }
+
+    T pop(){
+        if(empty()){
+            panic(PANICCODE::QUEUE_EMPTY);
+        }
+        T ret = array[begin];
+        begin = (begin+1) %MOD;
+        return ret;
+    }
+
+    T peek(){
+        if(empty()){
+            panic(PANICCODE::QUEUE_EMPTY);
+        }
+        return array[begin];
+
+    }
+
+    void clear(){
+        begin = 0;
+        end = 0;
+    }
+};
+
+enum class ABS_DIRECTION{
+    NORTH = 0,
+    EAST = 1,
+    SOUTH = 2,
+    WEST = 3,
+};
+
+enum class REL_DIRECTION{
+    FRONT = 0,
+    LEFT = 1,
+    RIGHT = 2,
+    BACK = 3,
+};
+
+struct Grid_Pos{
+    int32_t i;
+    int32_t j;
+};
+
+struct Relative_Grid_Pos{
+    int32_t di;
+    int32_t dj;
 };
