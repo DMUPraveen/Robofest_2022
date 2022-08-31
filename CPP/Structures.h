@@ -127,13 +127,22 @@ enum class REL_DIRECTION{
 };
 
 struct Grid_Pos{
-    int32_t i;
-    int32_t j;
+    int32_t i=0;
+    int32_t j=0;
+        
 };
 
 struct Relative_Grid_Pos{
     int32_t di;
     int32_t dj;
+};
+
+enum class BASIC_COMMANDS{
+    FORWARD,
+    TURN_LEFT,
+    TURN_RIGHT,
+    TURN_BACK,
+    BACKWARD
 };
 
 #endif

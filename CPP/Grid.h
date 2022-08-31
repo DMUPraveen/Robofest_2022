@@ -15,8 +15,19 @@ const uint8_t ADDITIONAL_DATA = 5;
 
 template<uint8_t R,uint8_t C>
 class Grid{
+private:
     uint64_t array[R][C] = {0};
 
+    void set_wall_helper(Grid_Pos a, Grid_Pos b){
+        auto dif = Relative_Grid_Pos{
+            a.i -b.i,
+            a.j -b.j
+        }
+        auto wall_direction = relative_grid_pos_to_abs(dif);
+        array[a.i][a.j] |= (1 << wall_direction);
+
+    }
+public:
     uint8_t get_height(){
         return R;
     }
@@ -39,15 +50,6 @@ class Grid{
         return self.grid[i][j] & (1UL << VISITED);
     }
 
-    void set_wall_helper(Grid_Pos a, Grid_Pos b){
-        auto dif = Relative_Grid_Pos{
-            a.i -b.i,
-            a.j -b.j
-        }
-        auto wall_direction = relative_grid_pos_to_abs(dif);
-        array[a.i][a.j] |= (1 << wall_direction);
-
-    }
 
     void set_wall(Grid_Pos a, Grid_Pos b){
         if !(0<=a.i && a.i <R && 0<=a.j && a.j<C) panic(PANICCODE::GRID_OUT_OF_BOUNDS);
