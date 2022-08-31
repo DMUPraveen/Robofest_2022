@@ -121,9 +121,9 @@ enum class ABS_DIRECTION{
 
 enum class REL_DIRECTION{
     FRONT = 0,
-    LEFT = 1,
-    RIGHT = 2,
-    BACK = 3,
+    RIGHT = 1,
+    BACK = 2,
+    LEFT = 3,
 };
 
 struct Grid_Pos{

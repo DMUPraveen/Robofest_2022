@@ -23,26 +23,12 @@ ABS_DIRECTION right_direction(ABS_DIRECTION dir){
 }
 
 ABS_DIRECTION get_rel_direction(ABS_DIRECTION dir, REL_DIRECTION reldir){
-    switch (reldir)
-    {
-    case REL_DIRECTION::FRONT:
-        return dir;
-        break;
-    case REL_DIRECTION::BACK:
-        return opposite_direction(dir);
-        break;
-    case REL_DIRECTION::LEFT:
-        return left_direction(dir);
-        break;
-    case REL_DIRECTION::RIGHT:
-        return right_direction(dir);
-        break;
-    
-    default:
-        panic(PANICCODE::PANIC);
-        return dir;
-        break;
-    }
+    return ABS_DIRECTION((static_cast<int8_t>(dir)+static_cast<int8_t>(reldir))%4);
+}
+
+REL_DIRECTION get_rel_dir_from_two_abs(ABS_DIRECTION current, ABS_DIRECTION next){
+    int8_t dif = (static_cast<int8_t>(next) - static_cast<int8_t>(current) +4)%4;
+    return REL_DIRECTION(dif);
 }
 
 Relative_Grid_Pos abs_dir_to_relative_pos(ABS_DIRECTION dir){
