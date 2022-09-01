@@ -67,6 +67,10 @@ public:
     bool orient();
 
     bool search();
+
+    Grid_Pos get_pos(){
+        return pos;
+    }
 };
 
 

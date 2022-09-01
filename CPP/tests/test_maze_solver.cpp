@@ -52,7 +52,13 @@ int main(){
     // debugger.do_move(BASIC_COMMANDS::FORWARD);
     // debugger.query_wall_states();
     auto robot = MazeSolver<14>(&debugger);
+    // std::cin.get();
+    // std::cin.get();
+    
     while(!robot.orient());
-    while(!robot.search());
+    while(!robot.search()){
+        // std::cout << robot.get_pos().i << ","<<robot.get_pos().j << std::endl;
+    }
+    std::cout << "end" << std::endl;
     return 0;
 }

@@ -1,3 +1,5 @@
+import os
+os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
 import pygame
 from Components.grid import Grid,NORTH,EAST,WEST,SOUTH
 from Components.robot import DIRECTION_MAP,FORWARD,BACKWARD,TURN_BACK,TURN_LEFT,TURN_RIGHT,OPPOSITE_MAP,LEFT_MAP, RIGHT_MAP,Robot
@@ -92,17 +94,21 @@ command_map = {
 }
 f = lambda x : 1 if x>0 else 0
 def main():
-    grid = get_grid("mazes\\bfs_early_detect_maze.json") 
+    grid = get_grid("mazes\\new_maze.json") 
     que = QueryEnv(Grid(grid),(0,0),EAST) 
     while True:
-        visualize(que)
+        #visualize(que)
         command = input()
         if(command == "?"):
             print(*(f(i) for i in que.query()))
+        elif(command == "end"):
+            with open("tests.txt","a") as fil:
+                fil.write(f"{[que.i,que.j]}OK\n")
+            break
         else:
             que.update(command_map[command])
             
-
+    return 0
 
 
 if __name__ == "__main__":

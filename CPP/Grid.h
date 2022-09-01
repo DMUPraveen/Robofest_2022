@@ -20,8 +20,8 @@ private:
 
     void set_wall_helper(Grid_Pos a, Grid_Pos b){
         auto dif = Relative_Grid_Pos{
-            a.i -b.i,
-            a.j -b.j
+            b.i -a.i,
+            b.j -a.j
         };
         auto wall_direction = relative_grid_pos_to_abs(dif);
         array[a.i][a.j] |= (1 << static_cast<int>(wall_direction));
