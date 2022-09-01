@@ -9,15 +9,15 @@ void MazeSolver<DIM>::make_internal_map()
             {0, j}, {1, j});
         internal_grid.set_wall(
             {internal_grid.get_height() - 1, j},
-            {internal_grid.get_height() - 2, j})
+            {internal_grid.get_height() - 2, j});
     }
     for (int i = 1; i < (internal_grid.get_height() - 1); i++)
     {
         internal_grid.set_wall(
-                         {i, 0}, {i, 1})
+                         {i, 0}, {i, 1});
             internal_grid.set_wall(
                 {i, internal_grid.get_width() - 1},
-                {i, internal_grid.get_width() - 2})
+                {i, internal_grid.get_width() - 2});
     }
 }
 
@@ -52,20 +52,21 @@ void MazeSolver<DIM>::make_wall_in_relative_direction(REL_DIRECTION rel)
 
     internal_grid.set_wall(
         pos,
-        {pos.i + other_cell_delta.di, pos.j + other_cell_delta.dj};)
+        {pos.i + other_cell_delta.di, pos.j + other_cell_delta.dj});
 }
 
 template <uint8_t DIM>
 void MazeSolver<DIM>::move_internal(BASIC_COMMANDS com)
 {
+    Relative_Grid_Pos delta = {0,0};
     switch (com)
     {
     case BASIC_COMMANDS::FORWARD:
-        Relative_Grid_Pos delta = abs_dir_to_relative_pos(orientation);
+        delta = abs_dir_to_relative_pos(orientation);
         pos = {pos.i + delta.di, pos.j + delta.dj};
         break;
     case BASIC_COMMANDS::BACKWARD:
-        Relative_Grid_Pos delta = abs_dir_to_relative_pos(opposite_direction(orientation));
+        delta = abs_dir_to_relative_pos(opposite_direction(orientation));
         pos = {pos.i + delta.di, pos.j + delta.dj};
         break;
     case BASIC_COMMANDS::TURN_BACK:
@@ -105,7 +106,7 @@ bool MazeSolver<DIM>::set_center()
     int64_t start_j = 1;
     Grid_Pos base_center = {
         start_i + delta.di * (DIM / 2 - 1),
-        start_j + delta.dj * (delta.diM / 2 - 1)};
+        start_j + delta.dj * (DIM / 2 - 1)};
     centers[0] = base_center;
     centers[1] = Grid_Pos{base_center.i, base_center.j + delta.dj};
     centers[2] = Grid_Pos{base_center.i + delta.di, base_center.j};
@@ -157,7 +158,7 @@ template <uint8_t DIM>
 Grid_Pos MazeSolver<DIM>::get_relaitve_cell(REL_DIRECTION rel)
 {
     ABS_DIRECTION abs_dir = abs_dir_from_rel(rel);
-    Grid_Pos delta = abs_dir_to_relative_pos(abs_dir);
+    Relative_Grid_Pos delta = abs_dir_to_relative_pos(abs_dir);
     return Grid_Pos{pos.i + delta.di, pos.j + delta.dj};
 }
 
@@ -185,7 +186,7 @@ bool MazeSolver<DIM>::orient()
     RelWallState wall_states = interface->query_wall_states();
     //walls on all sides
     if (wall_states.front  && wall_states.left && wall_states.right){
-        interface->do_move(BASIC_COMMANDS::TURN_RIGHT)
+        interface->do_move(BASIC_COMMANDS::TURN_RIGHT);
         return false;
     }
     //wall on front but there is an opening to the left or the right
@@ -194,7 +195,7 @@ bool MazeSolver<DIM>::orient()
             interface->do_move(BASIC_COMMANDS::TURN_LEFT);
             return false;
         }
-        if(!walls_state.right){
+        if(!wall_states.right){
             interface->do_move(BASIC_COMMANDS::TURN_RIGHT);
             return false;
         }
@@ -226,7 +227,7 @@ template<uint8_t DIM>
 bool MazeSolver<DIM>::is_a_center(Grid_Pos position){
     for(int i=0;i<4;i++){
         if(position.i == centers[i].i && position.j == centers[i].j){
-            return true
+            return true;
         }
     }
 
@@ -260,7 +261,7 @@ int64_t MazeSolver<DIM>::bfs(Grid_Pos start){
                 };
                 if(!internal_grid.visited(next_cell.i,next_cell.j) && !is_bfs_visited(next_cell)){
                     set_bfs_visited(next_cell);
-                    bfs_queue.push(Bfs_Node(next_cell,current.distance+1))
+                    bfs_queue.push(Bfs_Node(next_cell,current.distance+1));
                 }
             }
         }

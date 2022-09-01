@@ -1,7 +1,5 @@
 #ifndef MAZESOLVER_HEADER
 #define MAZESOLVER_HEADER
-#include "Structures.h"
-#include "Utility.h"
 #include "Grid.h"
 
 #define SAFETY_OFFSET 10

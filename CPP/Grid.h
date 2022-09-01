@@ -22,9 +22,9 @@ private:
         auto dif = Relative_Grid_Pos{
             a.i -b.i,
             a.j -b.j
-        }
+        };
         auto wall_direction = relative_grid_pos_to_abs(dif);
-        array[a.i][a.j] |= (1 << wall_direction);
+        array[a.i][a.j] |= (1 << static_cast<int>(wall_direction));
 
     }
 public:
@@ -37,31 +37,31 @@ public:
     WallStates get_walls(uint8_t i,uint8_t j){
         uint64_t chara = array[i][j];
         WallStates w;
-        w[ABS_DIRECTION::NORTH] = bool(chara & (1UL << ABS_DIRECTION::NORTH));
-        w[ABS_DIRECTION::EAST] = bool(chara & (1UL << ABS_DIRECTION::NORTH));
-        w[ABS_DIRECTION::SOUTH] = bool(chara & (1UL << ABS_DIRECTION::NORTH));
-        w[ABS_DIRECTION::WEST] = bool(chara & (1UL << ABS_DIRECTION::NORTH));
+        w.walls[static_cast<int>(ABS_DIRECTION::NORTH)] = bool(chara & (1UL <<static_cast<int>(ABS_DIRECTION::NORTH)));
+        w.walls[static_cast<int>(ABS_DIRECTION::EAST)] = bool(chara & (1UL <<static_cast<int>(ABS_DIRECTION::EAST)));
+        w.walls[static_cast<int>(ABS_DIRECTION::SOUTH)] = bool(chara & (1UL <<static_cast<int>(ABS_DIRECTION::SOUTH)));
+        w.walls[static_cast<int>(ABS_DIRECTION::WEST)] = bool(chara & (1UL <<static_cast<int>(ABS_DIRECTION::WEST)));
         return w;
     }
     bool get_bit(uint8_t i, uint8_t j,uint8_t data_bit){
         return array[i][j] & (1UL << data_bit);
     }
     bool visited(uint8_t i,uint8_t j){
-        return self.grid[i][j] & (1UL << VISITED);
+        return array[i][j] & (1UL << VISITED);
     }
 
 
     void set_wall(Grid_Pos a, Grid_Pos b){
-        if !(0<=a.i && a.i <R && 0<=a.j && a.j<C) panic(PANICCODE::GRID_OUT_OF_BOUNDS);
-        if !(0<=b.i && b.i <R && 0<=b.j && b.j<C) panic(PANICCODE::GRID_OUT_OF_BOUNDS);
+        if (!(0<=a.i && a.i <R && 0<=a.j && a.j<C)) panic(PANICCODE::GRID_OUT_OF_BOUNDS);
+        if (!(0<=b.i && b.i <R && 0<=b.j && b.j<C)) panic(PANICCODE::GRID_OUT_OF_BOUNDS);
         set_wall_helper(a,b);
         set_wall_helper(b,a);
     }
 
-    void set_visited(uint8_t i, unint8_t j){
+    void set_visited(uint8_t i, uint8_t j){
         array[i][j] |= (1UL << VISITED);
     }
-    void set_additional_data(uint8_t i, unint8_t j,uint64_t data){
+    void set_additional_data(uint8_t i, uint8_t j,uint64_t data){
         array[i][j] &= ((1UL << ADDITIONAL_DATA)-1); //resest the existing data to zero
         array[i][j] |= data << ADDITIONAL_DATA ;
     }
