@@ -6,7 +6,7 @@
 #include "Utility.h"
 
 struct WallStates{
-    bool walls = {0};
+    bool walls[4] = {0};
 };
 
 

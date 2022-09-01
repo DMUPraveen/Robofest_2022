@@ -23,6 +23,9 @@ struct Bfs_Node
 {
     Grid_Pos node;
     int64_t distance;
+    Bfs_Node(Grid_Pos node,int64_t distance)
+        :node(node),distance(distance)
+    {}
 };
 
 template <uint8_t DIM>
@@ -38,8 +41,8 @@ private:
     bool major_direction_intialized = false;
     Grid_Pos centers[4];
     int64_t bfs_count = 0;
-    auto bfs_queu = Queue<DIM * DIM + SAFETY_OFFSET, Bfs_Node>();
-    auto dfs_stack = Stack<DIM * DIM + SAFETY_OFFSET, Bfs_Node>();
+    Queue<DIM * DIM + SAFETY_OFFSET, Bfs_Node> bfs_queue;
+    Stack<DIM * DIM + SAFETY_OFFSET, Bfs_Node> dfs_stack;
 
     void make_internal_map();
     ABS_DIRECTION abs_dir_from_rel(REL_DIRECTION);
@@ -50,20 +53,17 @@ private:
     bool set_center();
     void go_to(REL_DIRECTION);
     void go_to_pos(Grid_Pos);
-    void get_relaitve_cell(REL_DIRECTION);
+    Grid_Pos get_relaitve_cell(REL_DIRECTION);
     bool is_bfs_visited(Grid_Pos);
     void set_bfs_visited(Grid_Pos);
     int64_t bfs(Grid_Pos);
     REL_DIRECTION get_best_path(RelWallState);
+    void initialize_major_direction(ABS_DIRECTION);
+    bool is_a_center(Grid_Pos);
 
 public:
-    MazeSolver()
-    {
-        pos.i = 1;
-        pos.j = DIM;
-        orientation = ABS_DIRECTION::EAST;
-        make_internal_map(); // drawing the pelimenary walls
-    }
+    MazeSolver(MazeSolver_Interface*);
+ 
 
     bool orient();
 

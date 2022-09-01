@@ -22,6 +22,18 @@ void MazeSolver<DIM>::make_internal_map()
 }
 
 template <uint8_t DIM>
+MazeSolver<DIM>::MazeSolver(MazeSolver_Interface *interface)
+    : interface(interface)
+{
+    pos.i = DIM;
+    pos.j = 1;
+
+    orientation = ABS_DIRECTION::EAST;
+    major_direction_intialized = false;
+    centers_intializes = false;
+    bfs_count = 0;
+}
+template <uint8_t DIM>
 ABS_DIRECTION MazeSolver<DIM>::abs_dir_from_rel(REL_DIRECTION rel)
 {
     return get_rel_direction(orientation, rel);
@@ -64,6 +76,7 @@ void MazeSolver<DIM>::move_internal(BASIC_COMMANDS com)
         break;
     case BASIC_COMMANDS::TURN_RIGHT:
         orientation = right_direction(orientation);
+        break;
     }
 }
 template <uint8_t DIM>
@@ -96,7 +109,7 @@ bool MazeSolver<DIM>::set_center()
     centers[0] = base_center;
     centers[1] = Grid_Pos{base_center.i, base_center.j + delta.dj};
     centers[2] = Grid_Pos{base_center.i + delta.di, base_center.j};
-    centers[3] = Grid_Pos{base_center.i + delta.di, base_center.j + delta.dj} ;
+    centers[3] = Grid_Pos{base_center.i + delta.di, base_center.j + delta.dj};
     ABS_DIRECTION wall_dir = opposite_direction(major_direction);
     for (int k = 1; k < internal_grid.get_width() - 1; k++)
     {
@@ -105,4 +118,240 @@ bool MazeSolver<DIM>::set_center()
     }
 
     return true;
+}
+
+template <uint8_t DIM>
+void MazeSolver<DIM>::go_to(REL_DIRECTION rel_dir)
+{
+    switch (rel_dir)
+    {
+    case REL_DIRECTION::BACK:
+        move(BASIC_COMMANDS::TURN_BACK);
+        move(BASIC_COMMANDS::FORWARD);
+        break;
+    case REL_DIRECTION::RIGHT:
+        move(BASIC_COMMANDS::TURN_RIGHT);
+        move(BASIC_COMMANDS::FORWARD);
+        break;
+    case REL_DIRECTION::LEFT:
+        move(BASIC_COMMANDS::TURN_LEFT);
+        move(BASIC_COMMANDS::FORWARD);
+        break;
+    case REL_DIRECTION::FRONT:
+        move(BASIC_COMMANDS::FORWARD);
+        break;
+    }
+}
+
+template <uint8_t DIM>
+void MazeSolver<DIM>::go_to_pos(Grid_Pos destination)
+{
+    Relative_Grid_Pos delta = {
+        destination.i - pos.i,
+        destination.j - pos.j};
+    REL_DIRECTION relative_direction_to_go = rel_from_abs(relative_grid_pos_to_abs(delta));
+    go_to(relative_direction_to_go);
+}
+
+template <uint8_t DIM>
+Grid_Pos MazeSolver<DIM>::get_relaitve_cell(REL_DIRECTION rel)
+{
+    ABS_DIRECTION abs_dir = abs_dir_from_rel(rel);
+    Grid_Pos delta = abs_dir_to_relative_pos(abs_dir);
+    return Grid_Pos{pos.i + delta.di, pos.j + delta.dj};
+}
+
+template <uint8_t DIM>
+bool MazeSolver<DIM>::is_bfs_visited(Grid_Pos position)
+{
+    return internal_grid.get_additional_data(position.i, position.j) == bfs_count;
+}
+
+template <uint8_t DIM>
+void MazeSolver<DIM>::set_bfs_visited(Grid_Pos position)
+{
+    internal_grid.set_additional_data(bfs_count);
+}
+
+
+template <uint8_t DIM>
+void MazeSolver<DIM>::initialize_major_direction(ABS_DIRECTION major_dir){
+    this->major_direction = major_dir;
+    major_direction_intialized = true;
+}
+template <uint8_t DIM>
+bool MazeSolver<DIM>::orient()
+{
+    RelWallState wall_states = interface->query_wall_states();
+    //walls on all sides
+    if (wall_states.front  && wall_states.left && wall_states.right){
+        interface->do_move(BASIC_COMMANDS::TURN_RIGHT)
+        return false;
+    }
+    //wall on front but there is an opening to the left or the right
+    if(wall_states.front){
+        if(!wall_states.left){
+            interface->do_move(BASIC_COMMANDS::TURN_LEFT);
+            return false;
+        }
+        if(!walls_state.right){
+            interface->do_move(BASIC_COMMANDS::TURN_RIGHT);
+            return false;
+        }
+
+    }
+
+    //there is no wall in the front
+    if(!wall_states.left){
+        initialize_major_direction(abs_dir_from_rel(REL_DIRECTION::LEFT));
+    }
+    else{
+        make_wall_in_relative_direction(REL_DIRECTION::LEFT);
+    }
+
+    if(!wall_states.right){
+        initialize_major_direction(abs_dir_from_rel(REL_DIRECTION::RIGHT));
+    }
+    else{
+        make_wall_in_relative_direction(REL_DIRECTION::RIGHT);
+    }
+
+    if(initialize_major_direction){
+        set_center();
+    }
+
+}
+
+template<uint8_t DIM>
+bool MazeSolver<DIM>::is_a_center(Grid_Pos position){
+    for(int i=0;i<4;i++){
+        if(position.i == centers[i].i && position.j == centers[i].j){
+            return true
+        }
+    }
+
+    return false;
+}
+
+template<uint8_t DIM>
+int64_t MazeSolver<DIM>::bfs(Grid_Pos start){
+
+    if(internal_grid.visited(start.i,start.j)){
+        return -1;
+    }
+    bfs_count +=1;
+    bfs_queue.clear();
+    set_bfs_visited(start);
+    bfs_queue.push(Bfs_Node(start,0));
+    while (!bfs_queue.empty()){
+        Bfs_Node current = bfs_queue.pop();
+        if(is_a_center(current.node)){
+            return current.distance;
+        }
+        WallStates wall_states = internal_grid.get_walls(current.node.i,current.node.j);
+        for(int i=0;i<4;i++){
+            ABS_DIRECTION dire = ABS_DIRECTION(i);
+            bool wall = wall_states.walls[i];
+            if(!wall){
+                Relative_Grid_Pos delta = abs_dir_to_relative_pos(dire);
+                Grid_Pos next_cell = {
+                    current.node.i+delta.di,
+                    current.node.j+delta.di,
+                };
+                if(!internal_grid.visited(next_cell.i,next_cell.j) && !is_bfs_visited(next_cell)){
+                    set_bfs_visited(next_cell);
+                    bfs_queue.push(Bfs_Node(next_cell,current.distance+1))
+                }
+            }
+        }
+
+    }
+    return -1;
+    
+}
+
+template<uint8_t DIM>
+REL_DIRECTION MazeSolver<DIM>::get_best_path(RelWallState rel_wall_states){
+    REL_DIRECTION best = REL_DIRECTION::BACK;
+    int64_t best_distance = DIM*DIM+SAFETY_OFFSET;
+
+    REL_DIRECTION dirs[3] = {REL_DIRECTION::LEFT,REL_DIRECTION::FRONT,REL_DIRECTION::RIGHT};
+    bool states[3] = {rel_wall_states.left,rel_wall_states.front,rel_wall_states.right};
+    if(!centers_intializes) {
+        for(int i=0;i<3;i++){
+            bool wall = states[i];
+            REL_DIRECTION dir = dirs[i];
+            Grid_Pos position = get_relaitve_cell(dir);
+            if(!wall and !internal_grid.visited(position.i,position.j)){
+                best = dir;
+            }
+        }
+        return best;
+
+    }
+    for(int i=0;i<3;i++){
+        bool wall = states[i];
+        REL_DIRECTION dir = dirs[i];
+        Grid_Pos position = get_relaitve_cell(dir);
+        if(!wall and !internal_grid.visited(position.i,position.j)){
+            Grid_Pos cell = get_relaitve_cell(position);
+            int64_t distance = bfs(cell);
+            if(!(distance == -1) && distance < best_distance){
+                best_distance = distance;
+                best = dir;
+            }
+
+
+
+        }
+    }
+    return best;
+
+
+}
+
+
+template<uint8_t DIM>
+bool MazeSolver<DIM>::search(){
+    internal_grid.set_visited(pos.i,pos.j);
+    RelWallState  rel_wall_states= interface->query_wall_states();
+    REL_DIRECTION dirs[3] = {REL_DIRECTION::LEFT,REL_DIRECTION::FRONT,REL_DIRECTION::RIGHT};
+    bool states[3] = {rel_wall_states.left,rel_wall_states.front,rel_wall_states.right};
+    for(int i=0;i<3;i++){
+        bool has_wall = states[i];
+        REL_DIRECTION dire = dirs[i];
+        if(has_wall){
+            make_wall_in_relative_direction(dire);
+        }
+        else{
+            if(dire!= REL_DIRECTION::FRONT && !major_direction_intialized){
+                //setting the centers
+                initialize_major_direction(abs_dir_from_rel(dire));
+                if(!set_center()){
+                    panic(PANICCODE::CENTER_INTIALIZATION_FAILED);
+                }
+            }
+        }
+        
+
+    }
+    if(centers_intializes && is_a_center(this->pos)){
+        return true;
+    }
+
+    REL_DIRECTION best_direction = get_best_path(rel_wall_states);
+    if(best_direction !=REL_DIRECTION::BACK){
+        dfs_stack.push(pos);
+        go_to(best_direction);
+        return false;
+    }
+
+    if(dfs_stack.empty()){
+        panic(PANICCODE::NEED_TO_GO_BACK_BUT_STACK_EMPTY);
+    }
+    go_to_pos(dfs_stack.pop());
+    return false;
+
+    
+    
 }
