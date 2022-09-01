@@ -11,6 +11,9 @@ private:
     T array[MAX_SIZE];
 
 public:
+    Stack(){
+
+    }
     int32_t size()
     {
         return end;
@@ -68,6 +71,9 @@ private:
     int32_t end = 0;
     int32_t MOD = MAX_SIZE+1;
 public:
+    Queue(){
+
+    }
     int32_t size(){
         return (end - begin + MOD) % MOD;
     }

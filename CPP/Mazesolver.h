@@ -20,7 +20,8 @@ public:
 struct Bfs_Node
 {
     Grid_Pos node;
-    int64_t distance;
+    int64_t distance=0;
+    Bfs_Node(){};
     Bfs_Node(Grid_Pos node,int64_t distance)
         :node(node),distance(distance)
     {}
@@ -39,8 +40,8 @@ private:
     bool major_direction_intialized = false;
     Grid_Pos centers[4];
     int64_t bfs_count = 0;
-    Queue<DIM * DIM + SAFETY_OFFSET, Bfs_Node> bfs_queue;
-    Stack<DIM * DIM + SAFETY_OFFSET, Bfs_Node> dfs_stack;
+    Queue<DIM * DIM + SAFETY_OFFSET, Bfs_Node> bfs_queue = Queue<DIM * DIM + SAFETY_OFFSET, Bfs_Node>();
+    Stack<DIM * DIM + SAFETY_OFFSET, Grid_Pos> dfs_stack =  Stack<DIM * DIM + SAFETY_OFFSET, Grid_Pos>();
 
     void make_internal_map();
     ABS_DIRECTION abs_dir_from_rel(REL_DIRECTION);
@@ -290,9 +291,10 @@ bool MazeSolver<DIM>::orient()
         make_wall_in_relative_direction(REL_DIRECTION::RIGHT);
     }
 
-    if(initialize_major_direction){
+    if(major_direction_intialized){
         set_center();
     }
+    return true;
 
 }
 
