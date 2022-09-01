@@ -51,7 +51,8 @@ int main(){
     maze_solver_debug debugger = maze_solver_debug();
     // debugger.do_move(BASIC_COMMANDS::FORWARD);
     // debugger.query_wall_states();
-    auto robot = MazeSolver<10>(&debugger);
+    auto robot = MazeSolver<14>(&debugger);
     while(!robot.orient());
+    while(!robot.search());
     return 0;
 }

@@ -106,6 +106,7 @@ MazeSolver<DIM>::MazeSolver(MazeSolver_Interface *interface)
     major_direction_intialized = false;
     centers_intializes = false;
     bfs_count = 0;
+    make_internal_map();
 }
 template <uint8_t DIM>
 ABS_DIRECTION MazeSolver<DIM>::abs_dir_from_rel(REL_DIRECTION rel)
@@ -245,7 +246,7 @@ bool MazeSolver<DIM>::is_bfs_visited(Grid_Pos position)
 template <uint8_t DIM>
 void MazeSolver<DIM>::set_bfs_visited(Grid_Pos position)
 {
-    internal_grid.set_additional_data(bfs_count);
+    internal_grid.set_additional_data(position.i,position.j,bfs_count);
 }
 
 
@@ -332,7 +333,7 @@ int64_t MazeSolver<DIM>::bfs(Grid_Pos start){
                 Relative_Grid_Pos delta = abs_dir_to_relative_pos(dire);
                 Grid_Pos next_cell = {
                     current.node.i+delta.di,
-                    current.node.j+delta.di,
+                    current.node.j+delta.dj,
                 };
                 if(!internal_grid.visited(next_cell.i,next_cell.j) && !is_bfs_visited(next_cell)){
                     set_bfs_visited(next_cell);
@@ -370,8 +371,8 @@ REL_DIRECTION MazeSolver<DIM>::get_best_path(RelWallState rel_wall_states){
         REL_DIRECTION dir = dirs[i];
         Grid_Pos position = get_relaitve_cell(dir);
         if(!wall and !internal_grid.visited(position.i,position.j)){
-            Grid_Pos cell = get_relaitve_cell(position);
-            int64_t distance = bfs(cell);
+            // Grid_Pos cell = get_relaitve_cell(position);
+            int64_t distance = bfs(position);
             if(!(distance == -1) && distance < best_distance){
                 best_distance = distance;
                 best = dir;
