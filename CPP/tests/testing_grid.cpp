@@ -1,9 +1,5 @@
 #include "Mazesolver.h"
 
-#include <iostream>
-#include <string>
-
-
 std::string move_to_str(BASIC_COMMANDS c){
     switch (c)
     {
@@ -32,7 +28,7 @@ std::string move_to_str(BASIC_COMMANDS c){
 class maze_solver_debug: public MazeSolver_Interface
 {
 public:
-    virtual uint32_t get_dimensions() {return 0;}
+    virtual uint8_t get_dimensions() {return 0;}
     virtual void do_move(BASIC_COMMANDS c) {
         std::cout << move_to_str(c) <<std::endl;
         
@@ -46,19 +42,10 @@ public:
     }
 
 };
-
 int main(){
-    maze_solver_debug debugger = maze_solver_debug();
-    // debugger.do_move(BASIC_COMMANDS::FORWARD);
-    // debugger.query_wall_states();
-    auto robot = MazeSolver<14>(&debugger);
-    // std::cin.get();
-    // std::cin.get();
-    
-    while(!robot.orient());
-    while(!robot.search()){
-        // std::cout << robot.get_pos().i << ","<<robot.get_pos().j << std::endl;
-    }
-    std::cout << "end" << std::endl;
+    auto que = maze_solver_debug();
+    auto robot = MazeSolver<14>(&que);
+    robot.show_internal();
+
     return 0;
 }

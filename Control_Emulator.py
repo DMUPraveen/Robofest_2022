@@ -108,18 +108,25 @@ def main():
     grid = get_grid(sys.argv[1]) 
     position = (choice((0,13)),choice((0,13))) 
     orientation = choice((EAST,NORTH,SOUTH,WEST))
+    position = (13,13)
+    orientation = WEST
     que = QueryEnv(Grid(grid),position,orientation) 
     while True:
-        #visualize(que)
+        # visualize(que)
         command = input()
         if(command == "?"):
             print(*(f(i) for i in que.query()))
+            with open(sys.argv[2],"a") as fil:
+                fil.write(" ".join(str(f(i)) for i in que.query())+'\n')
         elif(command == "end"):
             with open(sys.argv[2],"a") as fil:
                 fil.write(f"{[que.i,que.j]} with initial position {position} and orietntation {orientation_string_map[orientation]} --  OK\n")
             break
         else:
-            que.update(command_map[command])
+            try:
+                que.update(command_map[command])
+            except KeyError:
+                raise Exception(f"{position},{orientation}")
             
     return 0
 

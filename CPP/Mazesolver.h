@@ -2,7 +2,7 @@
 #define MAZESOLVER_HEADER
 #include "Grid.h"
 
-#define SAFETY_OFFSET 10
+#define SAFETY_OFFSET 500 
 struct RelWallState
 {
     bool left = false;
@@ -12,7 +12,7 @@ struct RelWallState
 class MazeSolver_Interface
 {
 public:
-    virtual uint8_t get_dimensions() = 0;
+    virtual uint32_t get_dimensions() = 0;
     virtual void do_move(BASIC_COMMANDS c) = 0;
     virtual RelWallState query_wall_states() = 0;
 };
@@ -27,7 +27,7 @@ struct Bfs_Node
     {}
 };
 
-template <uint8_t DIM>
+template <uint32_t DIM>
 class MazeSolver
 {
 private:
@@ -35,7 +35,7 @@ private:
     Grid_Pos pos = {0, 0};
     ABS_DIRECTION orientation;
     ABS_DIRECTION major_direction;
-    Grid<DIM * 2, DIM * 2 + 1> internal_grid;
+    Grid<DIM * 2+1, DIM +2> internal_grid;
     bool centers_intializes = false;
     bool major_direction_intialized = false;
     Grid_Pos centers[4];
@@ -71,6 +71,9 @@ public:
     Grid_Pos get_pos(){
         return pos;
     }
+    void show_internal(){
+        internal_grid.output_grid();
+    }
 };
 
 
@@ -78,7 +81,7 @@ public:
 
 //implementation
 
-template <uint8_t DIM>
+template <uint32_t DIM>
 void MazeSolver<DIM>::make_internal_map()
 {
     for (int j = 1; j < (internal_grid.get_width() - 1); j++)
@@ -99,7 +102,7 @@ void MazeSolver<DIM>::make_internal_map()
     }
 }
 
-template <uint8_t DIM>
+template <uint32_t DIM>
 MazeSolver<DIM>::MazeSolver(MazeSolver_Interface *interface)
     : interface(interface)
 {
@@ -112,19 +115,19 @@ MazeSolver<DIM>::MazeSolver(MazeSolver_Interface *interface)
     bfs_count = 0;
     make_internal_map();
 }
-template <uint8_t DIM>
+template <uint32_t DIM>
 ABS_DIRECTION MazeSolver<DIM>::abs_dir_from_rel(REL_DIRECTION rel)
 {
     return get_rel_direction(orientation, rel);
 }
 
-template <uint8_t DIM>
+template <uint32_t DIM>
 REL_DIRECTION MazeSolver<DIM>::rel_from_abs(ABS_DIRECTION abs_dir)
 {
     return get_rel_dir_from_two_abs(orientation, abs_dir);
 }
 
-template <uint8_t DIM>
+template <uint32_t DIM>
 void MazeSolver<DIM>::make_wall_in_relative_direction(REL_DIRECTION rel)
 {
     Relative_Grid_Pos other_cell_delta = abs_dir_to_relative_pos(abs_dir_from_rel(rel));
@@ -134,7 +137,7 @@ void MazeSolver<DIM>::make_wall_in_relative_direction(REL_DIRECTION rel)
         {pos.i + other_cell_delta.di, pos.j + other_cell_delta.dj});
 }
 
-template <uint8_t DIM>
+template <uint32_t DIM>
 void MazeSolver<DIM>::move_internal(BASIC_COMMANDS com)
 {
     Relative_Grid_Pos delta = {0,0};
@@ -159,14 +162,14 @@ void MazeSolver<DIM>::move_internal(BASIC_COMMANDS com)
         break;
     }
 }
-template <uint8_t DIM>
+template <uint32_t DIM>
 void MazeSolver<DIM>::move(BASIC_COMMANDS com)
 {
     move_internal(com);
     interface->do_move(com);
 }
 
-template <uint8_t DIM>
+template <uint32_t DIM>
 bool MazeSolver<DIM>::set_center()
 {
     if (!major_direction_intialized)
@@ -200,7 +203,7 @@ bool MazeSolver<DIM>::set_center()
     return true;
 }
 
-template <uint8_t DIM>
+template <uint32_t DIM>
 void MazeSolver<DIM>::go_to(REL_DIRECTION rel_dir)
 {
     switch (rel_dir)
@@ -223,7 +226,7 @@ void MazeSolver<DIM>::go_to(REL_DIRECTION rel_dir)
     }
 }
 
-template <uint8_t DIM>
+template <uint32_t DIM>
 void MazeSolver<DIM>::go_to_pos(Grid_Pos destination)
 {
     Relative_Grid_Pos delta = {
@@ -233,7 +236,7 @@ void MazeSolver<DIM>::go_to_pos(Grid_Pos destination)
     go_to(relative_direction_to_go);
 }
 
-template <uint8_t DIM>
+template <uint32_t DIM>
 Grid_Pos MazeSolver<DIM>::get_relaitve_cell(REL_DIRECTION rel)
 {
     ABS_DIRECTION abs_dir = abs_dir_from_rel(rel);
@@ -241,25 +244,25 @@ Grid_Pos MazeSolver<DIM>::get_relaitve_cell(REL_DIRECTION rel)
     return Grid_Pos{pos.i + delta.di, pos.j + delta.dj};
 }
 
-template <uint8_t DIM>
+template <uint32_t DIM>
 bool MazeSolver<DIM>::is_bfs_visited(Grid_Pos position)
 {
     return internal_grid.get_additional_data(position.i, position.j) == bfs_count;
 }
 
-template <uint8_t DIM>
+template <uint32_t DIM>
 void MazeSolver<DIM>::set_bfs_visited(Grid_Pos position)
 {
     internal_grid.set_additional_data(position.i,position.j,bfs_count);
 }
 
 
-template <uint8_t DIM>
+template <uint32_t DIM>
 void MazeSolver<DIM>::initialize_major_direction(ABS_DIRECTION major_dir){
     this->major_direction = major_dir;
     major_direction_intialized = true;
 }
-template <uint8_t DIM>
+template <uint32_t DIM>
 bool MazeSolver<DIM>::orient()
 {
     RelWallState wall_states = interface->query_wall_states();
@@ -303,7 +306,7 @@ bool MazeSolver<DIM>::orient()
 
 }
 
-template<uint8_t DIM>
+template<uint32_t DIM>
 bool MazeSolver<DIM>::is_a_center(Grid_Pos position){
     for(int i=0;i<4;i++){
         if(position.i == centers[i].i && position.j == centers[i].j){
@@ -314,7 +317,7 @@ bool MazeSolver<DIM>::is_a_center(Grid_Pos position){
     return false;
 }
 
-template<uint8_t DIM>
+template<uint32_t DIM>
 int64_t MazeSolver<DIM>::bfs(Grid_Pos start){
 
     if(internal_grid.visited(start.i,start.j)){
@@ -351,7 +354,7 @@ int64_t MazeSolver<DIM>::bfs(Grid_Pos start){
     
 }
 
-template<uint8_t DIM>
+template<uint32_t DIM>
 REL_DIRECTION MazeSolver<DIM>::get_best_path(RelWallState rel_wall_states){
     REL_DIRECTION best = REL_DIRECTION::BACK;
     int64_t best_distance = DIM*DIM+SAFETY_OFFSET;
@@ -392,7 +395,7 @@ REL_DIRECTION MazeSolver<DIM>::get_best_path(RelWallState rel_wall_states){
 }
 
 
-template<uint8_t DIM>
+template<uint32_t DIM>
 bool MazeSolver<DIM>::search(){
     internal_grid.set_visited(pos.i,pos.j);
     RelWallState  rel_wall_states= interface->query_wall_states();

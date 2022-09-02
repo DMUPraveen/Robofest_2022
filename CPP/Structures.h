@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include "Panic.h"
 
-template <uint8_t MAX_SIZE, typename T>
+template <uint32_t MAX_SIZE, typename T>
 class Stack
 {
 private:
@@ -63,7 +63,7 @@ public:
     }
 };
 
-template<uint8_t MAX_SIZE,typename T>
+template<uint32_t MAX_SIZE,typename T>
 class Queue{
 private:
     T array[MAX_SIZE+1];

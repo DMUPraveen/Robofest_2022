@@ -1,5 +1,6 @@
 #ifndef PANIC_GAURD
 #define PANIC_GAURD
+#include <iostream>
 enum class PANICCODE{
     PANIC,
     STACK_FULL,
@@ -15,6 +16,7 @@ enum class PANICCODE{
 
 
 void panic(PANICCODE panic){
+    std::cout << static_cast<int>(panic) << std::endl;
     throw (panic);
 }
 #endif

@@ -4,16 +4,17 @@
 #include <stdint.h>
 #include "Structures.h"
 #include "Utility.h"
+#include <iostream>
 
 struct WallStates{
     bool walls[4] = {0};
 };
 
 
-const uint8_t VISITED = 4;
-const uint8_t ADDITIONAL_DATA = 5;
+const uint32_t VISITED = 4;
+const uint32_t ADDITIONAL_DATA = 5;
 
-template<uint8_t R,uint8_t C>
+template<uint32_t R,uint32_t C>
 class Grid{
 private:
     uint64_t array[R][C] = {0};
@@ -28,13 +29,13 @@ private:
 
     }
 public:
-    uint8_t get_height(){
+    uint32_t get_height(){
         return R;
     }
-    uint8_t get_width(){
+    uint32_t get_width(){
         return C;
     }
-    WallStates get_walls(uint8_t i,uint8_t j){
+    WallStates get_walls(uint32_t i,uint32_t j){
         uint64_t chara = array[i][j];
         WallStates w;
         w.walls[static_cast<int>(ABS_DIRECTION::NORTH)] = bool(chara & (1UL <<static_cast<int>(ABS_DIRECTION::NORTH)));
@@ -43,10 +44,10 @@ public:
         w.walls[static_cast<int>(ABS_DIRECTION::WEST)] = bool(chara & (1UL <<static_cast<int>(ABS_DIRECTION::WEST)));
         return w;
     }
-    bool get_bit(uint8_t i, uint8_t j,uint8_t data_bit){
+    bool get_bit(uint32_t i, uint32_t j,uint32_t data_bit){
         return array[i][j] & (1UL << data_bit);
     }
-    bool visited(uint8_t i,uint8_t j){
+    bool visited(uint32_t i,uint32_t j){
         return array[i][j] & (1UL << VISITED);
     }
 
@@ -58,15 +59,27 @@ public:
         set_wall_helper(b,a);
     }
 
-    void set_visited(uint8_t i, uint8_t j){
+    void set_visited(uint32_t i, uint32_t j){
         array[i][j] |= (1UL << VISITED);
     }
-    void set_additional_data(uint8_t i, uint8_t j,uint64_t data){
+    void set_additional_data(uint32_t i, uint32_t j,uint64_t data){
         array[i][j] &= ((1UL << ADDITIONAL_DATA)-1); //resest the existing data to zero
         array[i][j] |= data << ADDITIONAL_DATA ;
     }
-    uint64_t get_additional_data(uint8_t i,uint8_t j){
+    uint64_t get_additional_data(uint32_t i,uint32_t j){
         return array[i][j] >> ADDITIONAL_DATA;
+    }
+
+    void output_grid(){
+        std::cout <<"[";
+        for(int i=0;i<R;i++){
+            std::cout <<"[";
+            for(int j=0;j<C;j++){
+                std::cout << array[i][j] << ",";
+            }
+            std::cout <<"]" <<",";
+        }
+        std::cout <<"]"<<std::endl;
     }
 
 };
