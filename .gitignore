@@ -3,4 +3,4 @@
 mazes/
 **/bin/
 tests.txt
-
+test_output/

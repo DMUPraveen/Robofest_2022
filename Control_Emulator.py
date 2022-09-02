@@ -1,6 +1,8 @@
 import os
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
 import pygame
+import sys
+from random import choice,randint
 from Components.grid import Grid,NORTH,EAST,WEST,SOUTH
 from Components.robot import DIRECTION_MAP,FORWARD,BACKWARD,TURN_BACK,TURN_LEFT,TURN_RIGHT,OPPOSITE_MAP,LEFT_MAP, RIGHT_MAP,Robot
 from Graphic_Engine.Graphic_Engine import Graphic_Engine,calculate_origin
@@ -92,18 +94,29 @@ command_map = {
     "TURN_RIGHT":TURN_RIGHT,
     "TURN_LEFT":TURN_LEFT
 }
+
+
+
+orientation_string_map = {
+    NORTH : "NORTH",
+    SOUTH : "SOUTH",
+    EAST : "EAST",
+    WEST : "WEST"
+}
 f = lambda x : 1 if x>0 else 0
 def main():
-    grid = get_grid("mazes\\new_maze.json") 
-    que = QueryEnv(Grid(grid),(0,0),EAST) 
+    grid = get_grid(sys.argv[1]) 
+    position = (choice((0,13)),choice((0,13))) 
+    orientation = choice((EAST,NORTH,SOUTH,WEST))
+    que = QueryEnv(Grid(grid),position,orientation) 
     while True:
         #visualize(que)
         command = input()
         if(command == "?"):
             print(*(f(i) for i in que.query()))
         elif(command == "end"):
-            with open("tests.txt","a") as fil:
-                fil.write(f"{[que.i,que.j]}OK\n")
+            with open(sys.argv[2],"a") as fil:
+                fil.write(f"{[que.i,que.j]} with initial position {position} and orietntation {orientation_string_map[orientation]} --  OK\n")
             break
         else:
             que.update(command_map[command])

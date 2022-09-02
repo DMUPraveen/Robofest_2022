@@ -1,1 +1,1 @@
-python3 interactive_runner.py python.exe Control_Emulator.py -- CPP/tests/bin/test_maze_solver
+python3 interactive_runner.py python.exe Control_Emulator.py mazes\\new_maze.json test_output\\test.txt -- CPP/tests/bin/test_maze_solver

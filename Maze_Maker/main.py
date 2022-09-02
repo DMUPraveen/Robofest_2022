@@ -60,12 +60,13 @@ def cycle_adder(acyclic_maze: Grid, number_of_walls_to_remove):
             count +=1
 
 
-def mazmake(maze_size,cycles_to_add=0):
+def mazmake(maze_size,cycles_to_add=0,visually_edit = True):
     grid = Grid(get_test_grid(maze_size, 0b01111))  # a grid with all four walls made
     dfs_make(grid)
-    visually_edit_grid(grid)
+    
+    if(visually_edit):visually_edit_grid(grid)
     cycle_adder(grid,cycles_to_add)
-    visually_edit_grid(grid)
+    if(visually_edit):visually_edit_grid(grid)
     return grid
 
 def main():
