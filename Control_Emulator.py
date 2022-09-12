@@ -112,7 +112,7 @@ def main():
     orientation = WEST
     que = QueryEnv(Grid(grid),position,orientation) 
     while True:
-        # visualize(que)
+        visualize(que)
         command = input()
         if(command == "?"):
             print(*(f(i) for i in que.query()))
