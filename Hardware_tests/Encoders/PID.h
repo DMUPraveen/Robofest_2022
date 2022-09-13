@@ -8,6 +8,7 @@ struct PID
     float m_K_P = 0.0f;
     float m_K_D = 0.0f;
     float m_K_I = 0.0f;
+    float I_error = 0.0f;
 
 
     PID(float K_P, float K_D, float K_I)
@@ -20,7 +21,19 @@ struct PID
     }
 
     float control(float measurement){
-        return m_K_P*(m_set_point - measurement);
+
+        float error = m_set_point - measurement;
+
+        float signal = m_K_P * error + m_K_I * I_error;
+
+        if ( (signal > 1 && error > 0) || ( signal < -1 && error < 0 ))
+        {  }
+
+        else
+        { I_error = I_error + error}
+        
+        return signal;
+        
     }
 };
 #endif
