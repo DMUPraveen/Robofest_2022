@@ -81,6 +81,37 @@ struct MotorController
 };
 
 
+struct Speed_Cal
+{
+    uint64_t pre_count=0;
+    uint64_t time;
+    uint64_t divs;
+    float speed;
+    Speed_Cal(uint64_t time,uint64_t divisions)
+    :time(time) , divs(divisions)
+    {
+        speed = 0.0f;
+    }
+    float calculate(uint64_t count){
+        int divisions = count - pre_count;
+        float  dt = float(micros()-time)/(1.0e6f);
+        // Serial.println(dt);
+        if(divisions == 0){
+            float anlge = (1.0f/float(divs))*2*PI;
+            float ss = anlge/dt;
+            if(ss < speed) return ss;
+            return speed;
+        }
+        float angle =   (float(divisions)/float(divs))*2*PI ;
+        pre_count = count;
+        time = micros();
+        speed = angle/dt;
+        return speed;
+
+
+    }
+};
+
 
 void check_motors(MotorController& motors,uint32_t dtime){
     motors.control(1,1);

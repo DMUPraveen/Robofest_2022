@@ -29,11 +29,17 @@ volatile float speedA = 0.0f;
 void isrA();
 #line 39 "c:\\Users\\dell\\Desktop\\Projects\\Robofest\\Dev\\Hardware_tests\\Encoders\\Encoder.ino"
 void isrB();
-#line 91 "c:\\Users\\dell\\Desktop\\Projects\\Robofest\\Dev\\Hardware_tests\\Encoders\\Encoder.ino"
+#line 68 "c:\\Users\\dell\\Desktop\\Projects\\Robofest\\Dev\\Hardware_tests\\Encoders\\Encoder.ino"
 void wait_for_serial();
-#line 104 "c:\\Users\\dell\\Desktop\\Projects\\Robofest\\Dev\\Hardware_tests\\Encoders\\Encoder.ino"
+#line 81 "c:\\Users\\dell\\Desktop\\Projects\\Robofest\\Dev\\Hardware_tests\\Encoders\\Encoder.ino"
+void set_pid_data(PID& pid,Data& my_data);
+#line 88 "c:\\Users\\dell\\Desktop\\Projects\\Robofest\\Dev\\Hardware_tests\\Encoders\\Encoder.ino"
+void set_data(Data& my_data);
+#line 122 "c:\\Users\\dell\\Desktop\\Projects\\Robofest\\Dev\\Hardware_tests\\Encoders\\Encoder.ino"
+void Test_PID();
+#line 162 "c:\\Users\\dell\\Desktop\\Projects\\Robofest\\Dev\\Hardware_tests\\Encoders\\Encoder.ino"
 void setup();
-#line 120 "c:\\Users\\dell\\Desktop\\Projects\\Robofest\\Dev\\Hardware_tests\\Encoders\\Encoder.ino"
+#line 172 "c:\\Users\\dell\\Desktop\\Projects\\Robofest\\Dev\\Hardware_tests\\Encoders\\Encoder.ino"
 void loop();
 #line 26 "c:\\Users\\dell\\Desktop\\Projects\\Robofest\\Dev\\Hardware_tests\\Encoders\\Encoder.ino"
 void isrA(){
@@ -68,39 +74,16 @@ auto motors = MotorController(motorA_dir1,
 
 auto controllerA = PID(1,0,0);
 auto controllerB = PID(1,0,0);
-
-
-
-struct Speed_Cal
-{
-    uint64_t pre_count=0;
-    uint64_t time;
-    uint64_t divs;
-    float speed;
-    Speed_Cal(uint64_t time,uint64_t divisions)
-    :time(time) , divs(divisions)
-    {
-        speed = 0.0f;
-    }
-    float calculate(uint64_t count){
-        int divisions = count - pre_count;
-        float  dt = float(micros()-time)/(1.0e6f);
-        // Serial.println(dt);
-        if(divisions == 0){
-            float anlge = (1.0f/float(divs))*2*PI;
-            float ss = anlge/dt;
-            if(ss < speed) return ss;
-            return speed;
-        }
-        float angle =   (float(divisions)/float(divs))*2*PI ;
-        pre_count = count;
-        time = micros();
-        speed = angle/dt;
-        return speed;
-
-
-    }
+struct Data{
+    float Kp = 0.0f;
+    float Ki = 0.0f;
+    float Kd = 0.0f;
+    float set_point = 0.0f;
 };
+
+auto my_data = Data();
+
+
 void wait_for_serial(){
     while (!Serial.available())
     {
@@ -114,55 +97,100 @@ void wait_for_serial(){
 auto sca = Speed_Cal(0.0,20);
 auto scb = Speed_Cal(0.0,20);
 
+void set_pid_data(PID& pid,Data& my_data){
+    pid.m_K_P = my_data.Kp;
+    pid.m_K_D = my_data.Kd;
+    pid.m_K_I = my_data.Ki;
+    pid.m_set_point = my_data.set_point;
+}
+
+void set_data(Data& my_data){
+    while(!Serial.available()){
+
+    }
+    digitalWrite(LED_BUILTIN,1);
+    float buffer[4] = {0};
+    Serial.readBytes((uint8_t*)buffer,4*4);
+    my_data.Kp = buffer[0];
+    my_data.Ki = buffer[1];
+    my_data.Kd = buffer[2];
+    my_data.set_point = buffer[3];
+    Serial.print("Kp: ");
+    Serial.print(my_data.Kp);
+    Serial.print(",");
+    Serial.print("Ki: ");
+    Serial.print(my_data.Ki);
+    Serial.print(",");
+    Serial.print("Kd: ");
+    Serial.print(my_data.Kd);
+    Serial.print(",");
+    Serial.print("set_point: ");
+    Serial.print(my_data.set_point);
+    Serial.println();
+
+    if(Serial.available()){ //clean up
+        while (Serial.available())
+        {
+            Serial.read();
+        }
+        
+    }
+}
+
+
+void Test_PID(){
+
+    controllerA.set_point(1);
+    controllerB.set_point(1);
+
+    wait_for_serial();
+    while(1){
+        bool stop = false;
+
+        while(Serial.available()){
+            Serial.read();
+            motors.Brake_A();
+            motors.Brake_B();
+            stop = true; 
+        }
+
+        if(stop) break;
+
+        motors.control(1.0,1.0);
+        return;
+
+        float sa =sca.calculate(counterA) ;
+        float sb  = scb.calculate(counterB);
+        float ca = controllerA.control(sa);
+        float cb = controllerB.control(sb);
+        motors.control(
+            ca > 0 ?ca:0,
+            cb > 0 ?cb:0
+        ); 
+        Serial.print(sa);
+        Serial.print('\t');
+        Serial.print(sb);
+        Serial.print('\t');
+        Serial.print(ca);
+        Serial.print('\t');
+        Serial.print(cb);
+        Serial.println();
+    }
+}
+
 void setup()
 {
     pinMode(encoderA, INPUT);
     pinMode(encoderB, INPUT);
     attachInterrupt(digitalPinToInterrupt(encoderA),isrA,RISING);
     attachInterrupt(digitalPinToInterrupt(encoderB),isrB,RISING);
-
-    controllerA.set_point(1);
-    controllerB.set_point(1);
-
     Serial.begin(9600);
     wait_for_serial();
-    
-    
 }
 
 void loop()
 {
 
-    bool stopped = false;
-    while(Serial.available()){
-        Serial.read();
-        motors.Brake_A();
-        motors.Brake_B();
-        stopped = true;
-    }
-    if(stopped){
-        wait_for_serial();
-        stopped = false;
-    }
-    motors.control(1.0,1.0);
-    return;
-
-    float sa =sca.calculate(counterA) ;
-    float sb  = scb.calculate(counterB);
-    float ca = controllerA.control(sa);
-    float cb = controllerB.control(sb);
-    motors.control(
-        ca > 0 ?ca:0,
-        cb > 0 ?cb:0
-    ); 
-    Serial.print(sa);
-    Serial.print('\t');
-    Serial.print(sb);
-    Serial.print('\t');
-    Serial.print(ca);
-    Serial.print('\t');
-    Serial.print(cb);
-    Serial.println();
 
     
 }
