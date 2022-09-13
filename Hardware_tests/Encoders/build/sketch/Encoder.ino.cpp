@@ -140,9 +140,9 @@ void set_data(Data& my_data){
 
 void Test_PID(){
 
-    controllerA.set_point(1);
-    controllerB.set_point(1);
-
+    set_data(my_data);
+    set_pid_data(controllerA,my_data);
+    set_pid_data(controllerB,my_data);
     wait_for_serial();
     while(1){
         bool stop = false;

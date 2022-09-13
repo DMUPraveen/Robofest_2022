@@ -30,7 +30,7 @@ struct PID
         {  }
 
         else
-        { I_error = I_error + error}
+        { I_error = I_error + error;}
         
         return signal;
         

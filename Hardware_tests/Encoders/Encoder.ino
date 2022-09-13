@@ -89,7 +89,6 @@ void set_data(Data& my_data){
     while(!Serial.available()){
 
     }
-    digitalWrite(LED_BUILTIN,1);
     float buffer[4] = {0};
     Serial.readBytes((uint8_t*)buffer,4*4);
     my_data.Kp = buffer[0];
@@ -163,6 +162,7 @@ void setup()
 {
     pinMode(encoderA, INPUT);
     pinMode(encoderB, INPUT);
+    pinMode(LED_BUILTIN,OUTPUT);
     attachInterrupt(digitalPinToInterrupt(encoderA),isrA,RISING);
     attachInterrupt(digitalPinToInterrupt(encoderB),isrB,RISING);
     Serial.begin(9600);
@@ -172,6 +172,7 @@ void setup()
 void loop()
 {
 
+    Test_PID();
 
     
 }

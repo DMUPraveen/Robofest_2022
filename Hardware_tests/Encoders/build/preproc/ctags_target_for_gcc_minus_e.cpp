@@ -122,9 +122,9 @@ void set_data(Data& my_data){
 
 void Test_PID(){
 
-    controllerA.set_point(1);
-    controllerB.set_point(1);
-
+    set_data(my_data);
+    set_pid_data(controllerA,my_data);
+    set_pid_data(controllerB,my_data);
     wait_for_serial();
     while(1){
         bool stop = false;
@@ -164,8 +164,8 @@ void setup()
 {
     pinMode(encoderA, 0x0);
     pinMode(encoderB, 0x0);
-    attachInterrupt(((encoderA) == 2 ? 0 : ((encoderA) == 3 ? 1 : -1)),isrA,3);
-    attachInterrupt(((encoderB) == 2 ? 0 : ((encoderB) == 3 ? 1 : -1)),isrB,3);
+    attachInterrupt(((encoderA) == 2 ? 0 : ((encoderA) == 3 ? 1 : ((encoderA) >= 18 && (encoderA) <= 21 ? 23 - (encoderA) : -1))),isrA,3);
+    attachInterrupt(((encoderB) == 2 ? 0 : ((encoderB) == 3 ? 1 : ((encoderB) >= 18 && (encoderB) <= 21 ? 23 - (encoderB) : -1))),isrB,3);
     Serial.begin(9600);
     wait_for_serial();
 }
