@@ -20,20 +20,26 @@ struct PID
         m_set_point = set_point;
     }
 
-    float control(float measurement){
+    float control(float measurement,float delta){
 
         float error = m_set_point - measurement;
 
-        float signal = m_K_P * error + m_K_I * I_error;
 
-        if ( (signal > 1 && error > 0) || ( signal < -1 && error < 0 ))
+        if ( (I_error > 1 && error > 0) || ( I_error < -1 && error < 0 ))
         {  }
 
         else
-        { I_error = I_error + error;}
+        { I_error = I_error + delta*error;}
         
+        float signal = m_K_P * error + m_K_I * I_error;
         return signal;
         
     }
 };
+    struct Data{
+        float Kp = 0.0f;
+        float Ki = 0.0f;
+        float Kd = 0.0f;
+        float set_point = 0.0f;
+    };
 #endif

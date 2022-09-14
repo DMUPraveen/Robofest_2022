@@ -1,8 +1,8 @@
 {
-    "Kp": 3.0,
-    "Ki": 0.0,
+    "Kp": 0.225, 
+    "Ki": 0.36, 
     "Kd": 0.0,
-    "Set_Velocity":2.0
+    "Set_Velocity": 15 
 
 
 }

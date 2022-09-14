@@ -18,19 +18,27 @@ const int motorB_en = 11;
 
 
 const float filter_factor = 0.05;
-const float noise_reject = 0.1f;
+const float noise_reject = 0.001f;
 
 volatile uint64_t counterA = 0;
 volatile float pre_timeA = 0.0f;
 volatile float speedA = 0.0f;
+// volatile bool show = false;
+// volatile float delta_t=0.0f ;
+// volatile uint8_t pinstate = 0;
 
 void isrA(){
     long ct = micros();
-    float dt = (ct - pre_timeA)/(1.0e6);
-    if(dt <noise_reject) return;
+    float dt = float(ct - pre_timeA)/float(1.0e6);
+
+    if(dt < noise_reject || digitalRead(encoderA)==0) return;
     counterA++;
+    // pinstate = digitalRead(encoderA);
+
     speedA = (3.1415926535897932384626433832795/10)/dt;
     pre_timeA = ct;
+    // show = true;
+    // delta_t = dt;
 }
 
 volatile uint64_t counterB = 0;
@@ -40,30 +48,16 @@ volatile float speedB = 0.0f;
 void isrB(){
     long ct = micros();
     float dt = (ct - pre_timeB)/(1.0e6);
-    if(dt <noise_reject) return;
+    if(dt <noise_reject || digitalRead(encoderB)==0) return;
     counterB++;
     speedB = 3.1415926535897932384626433832795/10/dt;
     pre_timeB = ct;
 }
 
 
-auto motors = MotorController(motorA_dir1,
-                         motorA_dir2,
-                         motorB_dir1,
-                         motorB_dir2,
-                         motorA_en,
-                         motorB_en);
 
-auto controllerA = PID(1,0,0);
-auto controllerB = PID(1,0,0);
-struct Data{
-    float Kp = 0.0f;
-    float Ki = 0.0f;
-    float Kd = 0.0f;
-    float set_point = 0.0f;
-};
 
-auto my_data = Data();
+
 
 
 void wait_for_serial(){
@@ -76,8 +70,6 @@ void wait_for_serial(){
     }
 
 }
-auto sca = Speed_Cal(0.0,20);
-auto scb = Speed_Cal(0.0,20);
 
 void set_pid_data(PID& pid,Data& my_data){
     pid.m_K_P = my_data.Kp;
@@ -90,7 +82,6 @@ void set_data(Data& my_data){
     while(!Serial.available()){
 
     }
-    digitalWrite(13,1);
     float buffer[4] = {0};
     Serial.readBytes((uint8_t*)buffer,4*4);
     my_data.Kp = buffer[0];
@@ -122,11 +113,31 @@ void set_data(Data& my_data){
 
 void Test_PID(){
 
+    auto my_data = Data();
+
+    auto controllerA = PID(1,0,0);
+    auto controllerB = PID(1,0,0);
+    auto sca = Speed_Cal(0.0,20);
+    auto scb = Speed_Cal(0.0,20);
+
+    auto motors = MotorController(motorA_dir1,
+                            motorA_dir2,
+                            motorB_dir1,
+                            motorB_dir2,
+                            motorA_en,
+                            motorB_en);
+    digitalWrite(13,0x1);
     set_data(my_data);
     set_pid_data(controllerA,my_data);
     set_pid_data(controllerB,my_data);
     wait_for_serial();
+    digitalWrite(13,0x0);
+    uint64_t time = micros();
+    uint64_t delta = 0;
     while(1){
+        // motors.control(1.0,1.0);
+        // continue;
+
         bool stop = false;
 
         while(Serial.available()){
@@ -138,25 +149,41 @@ void Test_PID(){
 
         if(stop) break;
 
-        motors.control(1.0,1.0);
-        return;
-
-        float sa =sca.calculate(counterA) ;
-        float sb = scb.calculate(counterB);
-        float ca = controllerA.control(sa);
-        float cb = controllerB.control(sb);
+        // float sa =sca.calculate(counterA) ;
+        // float sb  = scb.calculate(counterB);
+        float ca = controllerA.control(speedA,delta/1e6);
+        float cb = controllerB.control(speedB,delta/1e6);
         motors.control(
             ca > 0 ?ca:0,
             cb > 0 ?cb:0
         );
-        Serial.print(sa);
+        // motors.control(0.2,0.0);
+        // motors.control(0,0);
+        // Serial.print(delta);
+        // Serial.print('\t');
+        // Serial.print(sb);
+        // Serial.print('\t');
+        Serial.print(speedA);
         Serial.print('\t');
-        Serial.print(sb);
+        Serial.print(speedB);
         Serial.print('\t');
         Serial.print(ca);
         Serial.print('\t');
         Serial.print(cb);
+        // Serial.print((int)counterA);
         Serial.println();
+        // Serial.print(digitalRead(2));
+        // Serial.print('\t');
+        // Serial.print('\t');
+        // Serial.print(delta_t,6);
+        // Serial.print('\t');
+        // Serial.print(pinstate);
+        // Serial.println();
+        // show = false;
+
+
+        delta = micros() - time;
+        time = micros();
     }
 }
 
@@ -164,15 +191,16 @@ void setup()
 {
     pinMode(encoderA, 0x0);
     pinMode(encoderB, 0x0);
-    attachInterrupt(((encoderA) == 2 ? 0 : ((encoderA) == 3 ? 1 : ((encoderA) >= 18 && (encoderA) <= 21 ? 23 - (encoderA) : -1))),isrA,3);
-    attachInterrupt(((encoderB) == 2 ? 0 : ((encoderB) == 3 ? 1 : ((encoderB) >= 18 && (encoderB) <= 21 ? 23 - (encoderB) : -1))),isrB,3);
+    pinMode(13,0x1);
+    attachInterrupt(((encoderA) == 2 ? 0 : ((encoderA) == 3 ? 1 : -1)),isrA,3);
+    attachInterrupt(((encoderB) == 2 ? 0 : ((encoderB) == 3 ? 1 : -1)),isrB,3);
     Serial.begin(9600);
-    wait_for_serial();
 }
 
 void loop()
 {
 
+    Test_PID();
 
 
 }
