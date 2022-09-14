@@ -1,6 +1,8 @@
-#ifdef ODOMETRY_HEADER
+
+#ifndef ODOMETRY_HEADER
 #define ODOMETRY_HEADER
 
+#include <QMC5883LCompass.h>
 struct Odometry_Angle
 {
     float set_angle;
