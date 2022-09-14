@@ -2,6 +2,11 @@
 #ifndef PID_HEADER
 #define PID_HEADER
 
+struct PID_data{
+    float K_P;
+    float K_I;
+    float K_D;
+};
 struct PID
 {
 
@@ -11,6 +16,12 @@ struct PID
     float m_K_I = 0.0f;
     float I_error = 0.0f;
 
+    PID(){}
+    PID(PID_data data){
+        m_K_P = data.K_P;
+        m_K_I = data.K_I;
+        m_K_D = data.K_D;
+    }
 
     PID(float K_P, float K_D, float K_I)
         : m_K_P(K_P), m_K_D(K_D), m_K_I(K_I)
@@ -37,5 +48,6 @@ struct PID
         
     }
 };
+
     
 #endif
