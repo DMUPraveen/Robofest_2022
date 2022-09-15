@@ -3,6 +3,8 @@
 #define ODOMETRY_HEADER
 
 #include <QMC5883LCompass.h>
+
+
 struct Odometry_Angle
 {
     float set_angle;
@@ -43,6 +45,36 @@ struct Odometry_Angle
         }
         //return ( m_compass->getAzimuth() - set_angle );
     }
+
+    float target_difference( float target_angle ){
+      
+      float current_angle = cal_rotation() ;
+
+      float difference = abs( target_angle - current_angle );
+
+      if( difference <= 180 ){
+        if target_angle >= current_angle{
+          return difference;
+        }
+        else{
+          return -difference;
+        }
+      }
+      else{
+        if( target_angle > current_angle){
+            return ( difference-360);
+        }
+
+        else{
+            return ( -difference + 360 );
+        }
+
+      }
+    
+
+    }
+
+
 
 };
 
