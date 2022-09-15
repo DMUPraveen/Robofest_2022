@@ -65,8 +65,47 @@ void test_main_controoler_linear()
     }
 }
 
+
+
+
+void test_go_distance(){
+    
+    PID_data pid_control_variables = {0.225f, 0.36f, 0.0f};
+    MotorController motors = MotorController(motorA_dir1,
+                                             motorA_dir2,
+                                             motorB_dir1,
+                                             motorB_dir2,
+                                             motorA_en,
+                                             motorB_en);
+    MainController controller = MainController(&motors,pid_control_variables);
+    while(1){
+        wait_for_serial();
+        controller.set_linear_distance(counterA,counterB,15.0f);
+        uint64_t time = micros();
+        float delta = 0.0f;
+        while (1)
+        {
+            bool status = controller.go_linear_distance(counterA,counterB,speedA,speedB,delta);
+            if(status){
+                break;
+            }
+            Serial.print((int)counterA);
+            Serial.print('\t');
+            Serial.print((int)counterB);
+            Serial.print('\t');
+            Serial.print((int)controller.m_target_countA);
+            Serial.print('\t');
+            Serial.print((int)controller.m_target_countB);
+            Serial.println();
+            delta = float(micros() - time)/1.0e6f;
+            time = micros();
+        }
+        
+    }
+}
+
 void loop()
 {
     
-    test_main_controoler_linear();
+    test_go_distance();
 }

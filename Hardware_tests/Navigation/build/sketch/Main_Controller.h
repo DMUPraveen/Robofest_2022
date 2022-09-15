@@ -5,6 +5,8 @@
 #include "Motor_Controller.h"
 #include "PID.h"
 
+const float tick_constant = 1.0f;
+const float max_linear_speed = 10.0f;
 struct MainController
 {
     MotorController *m_motors;
@@ -12,6 +14,9 @@ struct MainController
     PID m_motor_B;
     float m_motor_speed_A =0.0f;
     float m_motor_speed_B = 0.0f;
+    uint64_t m_target_countA = 0;
+    uint64_t m_target_countB = 0;
+    uint64_t m_to_go = 0;
     MainController(MotorController *motors,PID_data motor_pid_data)
         :m_motors(motors), m_motor_A(PID(motor_pid_data)), m_motor_B(PID(motor_pid_data))
     {
@@ -34,17 +39,41 @@ struct MainController
     
         ca = m_motor_speed_A >0 ? ca:-ca;
         cb = m_motor_speed_B >0 ? cb:-cb;
-        Serial.print("ca: ");
-        Serial.print(ca);
-        Serial.print(",");
-        Serial.print("cb: ");
-        Serial.print(cb);
-        Serial.print(",");
+        // Serial.print("ca: ");
+        // Serial.print(ca);
+        // Serial.print(",");
+        // Serial.print("cb: ");
+        // Serial.print(cb);
+        // Serial.print(",");
         m_motors->control(ca,cb);
 
         
 
     }
+
+    void set_linear_distance(uint64_t counterA,uint64_t counterB,float distance){
+        //blocking code to go a certain linear distance
+        uint64_t to_go = (uint64_t)(distance/tick_constant);
+        m_target_countA = counterA+to_go; 
+        m_target_countB = counterB+to_go;
+        m_to_go = to_go;
+
+    }
+
+    bool go_linear_distance(uint64_t counterA,uint64_t counterB,float csa,float csb,float delta){
+        float sa = max_linear_speed;
+        float sb = max_linear_speed;
+        set_motor_speed(sa,sb);
+        control_speed(csa,csb,delta);
+        if(counterA >= m_target_countA || counterB >= m_target_countB){
+            set_motor_speed(0.0,0.0);
+            m_motors->Brake_A();
+            m_motors->Brake_B();
+            return true;
+        }
+        return false;
+    }
+
 };
 
 #endif

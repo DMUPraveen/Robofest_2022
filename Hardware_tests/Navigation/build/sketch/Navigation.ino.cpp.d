@@ -11,9 +11,6 @@ c:\Users\dell\Desktop\Projects\Robofest\Dev\Hardware_tests\Navigation\build\sket
  C:\Program\ Files\ (x86)\Arduino\hardware\arduino\avr\cores\arduino/USBAPI.h \
  C:\Program\ Files\ (x86)\Arduino\hardware\arduino\avr\cores\arduino/Arduino.h \
  C:\Program\ Files\ (x86)\Arduino\hardware\arduino\avr\variants\standard/pins_arduino.h \
- C:\Users\dell\Documents\Arduino\libraries\QMC5883LCompass\src/QMC5883LCompass.h \
- C:\Program\ Files\ (x86)\Arduino\hardware\arduino\avr\libraries\Wire\src/Wire.h \
- C:\Program\ Files\ (x86)\Arduino\hardware\arduino\avr\cores\arduino/Stream.h \
  c:\Users\dell\Desktop\Projects\Robofest\Dev\Hardware_tests\Navigation\build\sketch\Communication.h \
  c:\Users\dell\Desktop\Projects\Robofest\Dev\Hardware_tests\Navigation\build\sketch\SpeedCal.h \
  c:\Users\dell\Desktop\Projects\Robofest\Dev\Hardware_tests\Navigation\build\sketch\PID.h \
