@@ -122,12 +122,16 @@ def main():
         for stat in wall_list:
             a = a << 1
             a += stat
-        v = struct.pack('c',a)
+        ser.write(struct.pack('>B',a))
     def input():
-        return ser.readline().decode('utf-8')
-    
+        return ser.readline().decode('utf-8').strip()
+    print("Sending data")
+    ser.write(b'1');
+    print(input())
+
     while True:
-        visualize(que)
+        if(len(sys.argv) == 4 and sys.argv[3] == 'vis'):
+            visualize(que)
         command = input()
         if(command == "?"):
             output(tuple(f(i) for i in que.query()))
